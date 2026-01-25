@@ -1,9 +1,11 @@
+"use client";
+
 import {
   PencilSimpleIcon,
   TrashIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Transaction } from "../../types/transaction.type";
 
 interface ContextMenuProps {
@@ -23,69 +25,103 @@ export function TransactionContextMenu({
   handleOpenEdit,
   handleDelete,
 }: ContextMenuProps) {
-  React.useEffect(() => {
-    const handleClick = () => onClose();
-    window.addEventListener("click", handleClick);
-    return () => window.removeEventListener("click", handleClick);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleGlobalContextMenu = (e: MouseEvent) => e.preventDefault();
+    const handleClickOutside = () => onClose();
+
+    window.addEventListener("contextmenu", handleGlobalContextMenu);
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("contextmenu", handleGlobalContextMenu);
+      window.removeEventListener("click", handleClickOutside);
+    };
   }, [onClose]);
 
   const isSeries = transaction.recurrence !== "ONE_TIME";
 
+  // --- LÓGICA DE POSICIONAMENTO SEM SETSTATE ---
+  // Usamos as dimensões da janela para decidir a direção do menu
+  const screenWidth = typeof window !== "undefined" ? window.innerWidth : 0;
+  const screenHeight = typeof window !== "undefined" ? window.innerHeight : 0;
+
+  // Se o clique foi na metade direita, movemos o menu para a esquerda do mouse (100% de translação)
+  const pivotX = x > screenWidth / 2 ? "-100%" : "0%";
+  // Se o clique foi na metade de baixo, movemos o menu para cima do mouse
+  const pivotY = y > screenHeight / 2 ? "-100%" : "0%";
+
   return (
     <div
-      className="fixed z-110 bg-white border border-neutral-200 shadow-xl rounded-xl py-1.5 w-56 text-sm animate-in fade-in zoom-in duration-100"
-      style={{ top: y, left: x }}
+      ref={menuRef}
+      className="fixed z-120 bg-white border border-neutral-200 shadow-2xl rounded-2xl py-2 w-60 text-sm animate-in fade-in zoom-in duration-150 ease-out"
+      style={{
+        top: y,
+        left: x,
+        transform: `translate(${pivotX}, ${pivotY})`, // O CSS resolve o "pulo" instantaneamente
+      }}
       onClick={(e) => e.stopPropagation()}
+      onContextMenu={(e) => e.preventDefault()}
     >
-      {/* EDITAR */}
+      <div className="px-4 py-2 mb-1 border-b border-neutral-50">
+        <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
+          Opções
+        </p>
+      </div>
+
       <button
-        className="w-full px-3 py-2 text-left hover:bg-neutral-50 flex items-center gap-2 text-neutral-700 transition"
+        className="w-full px-4 py-2.5 text-left hover:bg-neutral-50 flex items-center gap-3 text-neutral-700 transition-colors font-medium"
         onClick={() => {
           handleOpenEdit(transaction);
           onClose();
         }}
       >
-        <PencilSimpleIcon size={18} /> Editar transação
+        <PencilSimpleIcon
+          size={20}
+          weight="bold"
+          className="text-neutral-400"
+        />
+        Editar transação
       </button>
 
-      <div className="h-px bg-neutral-100 my-1" />
+      <div className="my-1 border-t border-neutral-100" />
 
-      {/* EXCLUIR SIMPLES (Caso não seja série) */}
       {!isSeries ? (
         <button
-          className="w-full px-3 py-2 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 transition"
+          className="w-full px-4 py-2.5 text-left hover:bg-red-50 flex items-center gap-3 text-red-600 transition-colors font-medium"
           onClick={() => {
             handleDelete(transaction.id, "one");
             onClose();
           }}
         >
-          <TrashIcon size={18} /> Excluir transação
+          <TrashIcon size={20} weight="bold" />
+          Excluir transação
         </button>
       ) : (
-        /* EXCLUIR SÉRIE (Fixa ou Parcelada) */
-        <>
-          <div className="px-3 py-1 text-[10px] font-bold text-neutral-400 uppercase tracking-tight">
-            Opções de Exclusão
+        <div className="space-y-0.5">
+          <div className="px-4 py-2 text-[10px] font-black text-neutral-400 uppercase tracking-widest">
+            Excluir recorrência
           </div>
           <button
-            className="w-full px-3 py-2 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 transition"
+            className="w-full px-4 py-2.5 text-left hover:bg-red-50 flex items-center gap-3 text-red-600 transition-colors font-medium"
             onClick={() => {
               handleDelete(transaction.id, "one");
               onClose();
             }}
           >
-            <TrashIcon size={18} /> Somente esta
+            <TrashIcon size={20} weight="bold" /> Somente esta
           </button>
           <button
-            className="w-full px-3 py-2 text-left hover:bg-red-50 flex items-center gap-2 text-red-600 transition"
+            className="w-full px-4 py-2.5 text-left hover:bg-red-50 flex items-center gap-3 text-red-600 transition-colors font-medium"
             onClick={() => {
               handleDelete(transaction.id, "all");
               onClose();
             }}
           >
-            <WarningCircleIcon size={18} /> Toda a série
+            <WarningCircleIcon size={20} weight="bold" /> Toda a série
           </button>
-        </>
+        </div>
       )}
     </div>
   );
