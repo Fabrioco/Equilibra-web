@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { toast } from "react-toastify";
 import { RegisterForm } from "../components/register-form";
-import { ERROR_TRANSLATIONS } from "../constants/error-messages";
+import { useAuth } from "@/contexts/auth-context";
 
 // --- Página Principal ---
 export default function RegisterPage() {
+  const { register, isLoading } = useAuth();
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
@@ -14,7 +14,6 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = React.useState(false);
   const [isChecked, setIsChecked] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
 
   // Foco automático no nome ao abrir a página
   const nameRef = React.useRef<HTMLInputElement>(null);
@@ -30,35 +29,7 @@ export default function RegisterPage() {
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     if (!isFormValid) return;
-
-    setIsLoading(true);
-    try {
-      const res = await fetch("http://localhost:3333/v1/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        // Lógica de tradução que você já fez (mantida)
-        const errors = data.errors as Record<string, string[]> | undefined;
-        const rawError =
-          (errors ? Object.values(errors)[0]?.[0] : null) ||
-          data.message ||
-          "Erro";
-        const translated = ERROR_TRANSLATIONS[rawError] || rawError;
-        toast.error(translated);
-        return;
-      }
-
-      toast.success("Conta criada! Redirecionando...");
-    } catch {
-      toast.error("Erro de conexão com o servidor.");
-    } finally {
-      setIsLoading(false);
-    }
+    await register(formData);
   }
 
   return (

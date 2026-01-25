@@ -2,11 +2,8 @@
 
 import Link from "next/link";
 import React from "react";
-import { toast } from "react-toastify";
 import { LoginForm } from "../components/login-form";
-import { LoginResponse } from "../types/auth.types";
-import { ERROR_TRANSLATIONS } from "../constants/error-messages";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function LoginPage() {
   const [email, setEmail] = React.useState<string>("");
@@ -15,7 +12,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
-  const router = useRouter();
+  const { login } = useAuth();
 
   async function handleLogin() {
     if (!email || !password) return;
@@ -24,35 +21,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3333/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        // 1. Tenta pegar a primeira mensagem de erro do Zod (ex: password ou email)
-        const errors = data.errors as Record<string, string[]> | undefined;
-        const firstZodError =
-          errors && typeof errors === "object"
-            ? Object.values(errors)[0]?.[0]
-            : null;
-
-        // 2. Usa a tradução para o erro do Zod ou para a mensagem geral
-        const rawError =
-          firstZodError || data.message || "Falha ao realizar login";
-        const translated = ERROR_TRANSLATIONS[rawError] || rawError;
-
-        toast.error(translated);
-        return;
-      }
-
-      const loginData = data as LoginResponse;
-      toast.success(`Bem-vindo de volta, ${loginData.user.name}!`);
-      localStorage.setItem("token", loginData.token);
-      router.push("/");
+      await login(email, password);
     } catch (error: unknown) {
       setErrorMessage(
         error instanceof Error
