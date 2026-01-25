@@ -10,7 +10,7 @@ export interface RegisterResponse {
 export interface LoginResponse {
   message?: string;
   errors?: Record<string, string[]>;
-  accessToken: string;
+  token: string;
   user: {
     id: number;
     name: string;

@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { LoginForm } from "../components/login-form";
 import { LoginResponse } from "../types/auth.types";
 import { ERROR_TRANSLATIONS } from "../constants/error-messages";
-
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = React.useState<string>("");
@@ -14,6 +14,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+  const router = useRouter();
 
   async function handleLogin() {
     if (!email || !password) return;
@@ -49,6 +51,8 @@ export default function LoginPage() {
 
       const loginData = data as LoginResponse;
       toast.success(`Bem-vindo de volta, ${loginData.user.name}!`);
+      localStorage.setItem("token", loginData.token);
+      router.push("/");
     } catch (error: unknown) {
       setErrorMessage(
         error instanceof Error
