@@ -31,6 +31,7 @@ import { MobileTransactionMenu } from "../_components/layout/mobile-transaction-
 import { TransactionContextMenu } from "../_components/layout/transaction-context-menu";
 import { UserSettingsDrawer } from "../_components/ui/user-settings-drawer";
 import { API_URL } from "@/config/env";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function Home() {
   // --- Estados ---
@@ -54,6 +55,8 @@ export default function Home() {
 
   const router = useRouter();
 
+  const { user } = useAuth();
+
   // --- Navegação ---
   const nextMonth = () =>
     setCurrentDate(
@@ -73,12 +76,9 @@ export default function Home() {
     if (!token) return router.push("/auth/login");
     try {
       setIsLoading(true);
-      const res = await fetch(
-         `${API_URL}/transactions`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const res = await fetch(`${API_URL}/transactions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (res.status === 401) {
         localStorage.removeItem("token");
         return router.push("/auth/login");
@@ -94,12 +94,9 @@ export default function Home() {
 
   const fetchGoals = useCallback(async () => {
     try {
-      const res = await fetch(
-        `${API_URL}/goals`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        },
-      );
+      const res = await fetch(`${API_URL}/goals`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0)
         setMonthlyGoal(data[data.length - 1].amount / 100);
@@ -210,9 +207,14 @@ export default function Home() {
     return res.slice(0, displayLimit);
   }, [transactionsOfMonth, searchTerm, sortOrder, displayLimit]);
 
-  const formatCurrency = (v: number) =>
-    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const formatCurrency = (v: number) => {
+    if (user?.privacyMode) return "*******"; // Se privado, ignora o valor e retorna máscara
 
+    return v.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  };
   // --- Handlers ---
   const handleOpenEdit = (t: Transaction) => {
     setTransactionToEdit(t);
@@ -228,13 +230,10 @@ export default function Home() {
     scope: "one" | "all" = "one",
   ) {
     if (scope === "all" && !confirm("Excluir série?")) return;
-    const res = await fetch(
-      `${API_URL}/transactions/${id}?scope=${scope}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      },
-    );
+    const res = await fetch(`${API_URL}/transactions/${id}?scope=${scope}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
     if (res.ok) {
       toast.success("Excluído!");
       fetchTransactions();
@@ -307,22 +306,22 @@ export default function Home() {
                 <div className="h-8 w-20 bg-neutral-100 animate-pulse mt-2 rounded" />
               ) : (
                 <p className="text-3xl font-black text-neutral-900 mt-1">
-                  {summaryValues.commitment}%
+                  {/* Condicional aqui */}
+                  {user?.privacyMode ? "**%" : `${summaryValues.commitment}%`}
                 </p>
               )}
               <div className="w-full bg-neutral-100 h-2 rounded-full overflow-hidden mt-4">
                 <div
-                  className={`h-full transition-all duration-1000 ${summaryValues.commitment > 80 ? "bg-red-500" : "bg-neutral-900"}`}
+                  className={`h-full transition-all duration-1000 ${
+                    summaryValues.commitment > 80
+                      ? "bg-red-500"
+                      : "bg-neutral-900"
+                  } ${user?.privacyMode ? "opacity-0" : "opacity-100"}`} // Esconde a barra
                   style={{
                     width: `${isLoading ? 0 : summaryValues.commitment}%`,
                   }}
                 />
               </div>
-              <p className="text-[10px] text-neutral-400 mt-3 font-bold uppercase tracking-tighter">
-                {summaryValues.commitment > 80
-                  ? "⚠️ Limite Crítico"
-                  : "✅ Dentro do esperado"}
-              </p>
             </div>
 
             <div className="bg-neutral-900 rounded-3xl p-6 shadow-xl text-white">
@@ -338,7 +337,6 @@ export default function Home() {
               </p>
             </div>
           </div>
-
           {/* Gráfico de Categoria */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-neutral-100 h-80">
             <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">
@@ -349,14 +347,15 @@ export default function Home() {
               formatCurrency={formatCurrency}
             />
           </div>
-
           {/* Gráfico de Evolução */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-neutral-100 h-80">
+          <div
+            className={`bg-white rounded-3xl p-6 shadow-sm border border-neutral-100 h-80 transition-all duration-500 ${user?.privacyMode ? "blur-md select-none pointer-events-none" : ""}`}
+          >
             <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">
               Fluxo Diário
             </h3>
             <DailyAreaChart data={dailyData} formatCurrency={formatCurrency} />
-          </div>
+          </div>{" "}
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm overflow-hidden border border-neutral-100">

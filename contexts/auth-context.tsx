@@ -19,12 +19,18 @@ interface AuthContextType {
   logout: () => Promise<void>;
   user: User | null;
   initializeAuth: () => Promise<void>;
+  updateUserData: (data: Partial<User>) => Promise<void>;
 }
 
 type User = {
   id: number;
   name: string;
   email: string;
+  plan: string;
+  privacyMode: boolean;
+  enableNotifications: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -144,7 +150,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      const registerData = data as LoginResponse;
+      localStorage.setItem("token", registerData.token);
+      setIsAuthenticated(true);
+      setUser(registerData.user);
       toast.success("Conta criada! Redirecionando...");
+      router.push("/");
     } catch {
       toast.error("Erro de conexão com o servidor.");
     } finally {
@@ -160,6 +171,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     router.push("/auth/login");
   };
 
+  const updateUserData = async (data: Partial<User>) => {
+    setUser((prevUser) => {
+      if (!prevUser) return null;
+      // Faz o merge dos dados antigos com os novos campos
+      return { ...prevUser, ...data };
+    });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -170,6 +189,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout,
         user,
         initializeAuth,
+        updateUserData,
       }}
     >
       {children}
