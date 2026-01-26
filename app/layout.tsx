@@ -3,6 +3,7 @@ import "./globals.css";
 import { Montserrat } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "@/contexts/auth-context";
+import { Sidebar } from "./_components/layout/sidebar";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
@@ -18,11 +19,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body
-        className={`${montserrat.className} bg-gray-100 px-4 mx-auto flex min-h-screen flex-col items-center justify-center antialiased`}
-      >
+      <body className={`${montserrat.className} bg-neutral-50 antialiased`}>
         <AuthProvider>
-          {children}
+          {/* Wrapper Principal: 
+            flex-row no desktop para Sidebar + Conteúdo 
+            flex-col no mobile para Conteúdo + Bottom Nav
+          */}
+          <div className="flex flex-col md:flex-row min-h-screen">
+            {/* Sidebar fixa ou barra inferior no mobile */}
+            <Sidebar />
+
+            {/* Área do Conteúdo:
+              flex-1 faz ele ocupar todo o espaço restante.
+              A largura máxima e o margin auto mantêm o Dashboard elegante.
+            */}
+            <main className="flex-1 w-full relative">{children}</main>
+          </div>
+
           <ToastContainer position="top-right" autoClose={3000} />
         </AuthProvider>
       </body>

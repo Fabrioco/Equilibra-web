@@ -1,5 +1,6 @@
 "use client";
 
+import { API_URL } from "@/config/env";
 import { useAuth } from "@/contexts/auth-context";
 import {
   XIcon,
@@ -54,7 +55,7 @@ export function UserSettingsDrawer({
   const hasChanges = name !== user?.name || email !== user?.email;
 
   const handleSaveChanges = async () => {
-    const res = await fetch("http://localhost:3333/v1/auth/me", {
+    const res = await fetch(`${API_URL}/auth/me`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

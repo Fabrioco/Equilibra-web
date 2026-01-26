@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Transaction } from "../../types/transaction.type";
 import { toast } from "react-toastify";
+import { API_URL } from "@/config/env";
 
 export function NewTransactionForm({
   onClose,
@@ -81,8 +82,8 @@ export function NewTransactionForm({
 
     // URL e Método dinâmicos
     const url = isEditing
-      ? `http://localhost:3333/v1/transactions/${initialData.id}`
-      : "http://localhost:3333/v1/transactions";
+      ? `${API_URL}/transactions/${initialData.id}`
+      : `${API_URL}/transactions`;
 
     const method = isEditing ? "PUT" : "POST";
 
@@ -129,9 +130,12 @@ export function NewTransactionForm({
       if (!token) return;
 
       try {
-        const res = await fetch("http://localhost:3333/v1/transactions", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `${API_URL}/transactions`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
         const data = await res.json();
         const fetched = Array.isArray(data.items)
           ? Array.from(new Set(data.items.map((t: Transaction) => t.category)))

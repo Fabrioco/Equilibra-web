@@ -30,6 +30,7 @@ import { TransactionDrawer } from "../_components/ui/new-transaction-drawer";
 import { MobileTransactionMenu } from "../_components/layout/mobile-transaction-menu";
 import { TransactionContextMenu } from "../_components/layout/transaction-context-menu";
 import { UserSettingsDrawer } from "../_components/ui/user-settings-drawer";
+import { API_URL } from "@/config/env";
 
 export default function Home() {
   // --- Estados ---
@@ -72,9 +73,12 @@ export default function Home() {
     if (!token) return router.push("/auth/login");
     try {
       setIsLoading(true);
-      const res = await fetch("http://localhost:3333/v1/transactions", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+         `${API_URL}/transactions`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       if (res.status === 401) {
         localStorage.removeItem("token");
         return router.push("/auth/login");
@@ -90,9 +94,12 @@ export default function Home() {
 
   const fetchGoals = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost:3333/v1/goals", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const res = await fetch(
+        `${API_URL}/goals`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0)
         setMonthlyGoal(data[data.length - 1].amount / 100);
@@ -222,7 +229,7 @@ export default function Home() {
   ) {
     if (scope === "all" && !confirm("Excluir série?")) return;
     const res = await fetch(
-      `http://localhost:3333/v1/transactions/${id}?scope=${scope}`,
+      `${API_URL}/transactions/${id}?scope=${scope}`,
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },

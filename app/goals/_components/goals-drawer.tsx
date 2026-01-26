@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import {
   XIcon,
   TargetIcon,
@@ -8,6 +8,7 @@ import {
   CurrencyDollarIcon,
 } from "@phosphor-icons/react";
 import { toast } from "react-toastify";
+import { API_URL } from "@/config/env";
 
 interface Goal {
   id: number;
@@ -71,8 +72,8 @@ export function GoalDrawer({
 
     const token = localStorage.getItem("token");
     const url = goalToEdit
-      ? `http://localhost:3333/v1/goals/${goalToEdit.id}`
-      : "http://localhost:3333/v1/goals";
+      ? `${API_URL}/goals/${goalToEdit.id}`
+      : `${API_URL}/goals`;
 
     const method = goalToEdit ? "PUT" : "POST";
 

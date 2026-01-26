@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { LoginResponse } from "@/app/auth/types/auth.types";
 import { ERROR_TRANSLATIONS } from "@/app/auth/constants/error-messages";
+import { API_URL } from "@/config/env";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -42,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const res = await fetch("http://localhost:3333/v1/auth/me", {
+        const res = await fetch(`${API_URL}/auth/me`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -77,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:3333/v1/auth/login", {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -123,7 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }) => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:3333/v1/auth/register", {
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
