@@ -117,6 +117,11 @@ export function NewTransactionForm({
       toast.success(
         `Transação ${isEditing ? "atualizada" : "criada"} com sucesso!`,
       );
+
+      if (!isEditing) {
+        resetForm();
+      }
+
       onSuccess();
       onClose();
     } catch {
@@ -130,12 +135,9 @@ export function NewTransactionForm({
       if (!token) return;
 
       try {
-        const res = await fetch(
-          `${API_URL}/transactions`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+        const res = await fetch(`${API_URL}/transactions`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const data = await res.json();
         const fetched = Array.isArray(data.items)
           ? Array.from(new Set(data.items.map((t: Transaction) => t.category)))
