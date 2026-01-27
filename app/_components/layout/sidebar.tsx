@@ -75,21 +75,20 @@ export function Sidebar() {
           </button>
         </div>
       </aside>
-
-      {/* MOBILE BOTTOM NAV - Mais discreta */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-neutral-100 z-50 px-6 py-3 pb-8 flex justify-between items-center">
+      {/* MOBILE BOTTOM NAV - Versão Corrigida */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-neutral-100 z-50 px-4 pt-3 flex justify-around items-center  shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 ${
-                isActive ? "text-neutral-900" : "text-neutral-400"
+              className={`flex flex-col items-center gap-1.5 min-w-[64px] transition-all ${
+                isActive ? "text-neutral-900 scale-105" : "text-neutral-400"
               }`}
             >
               <item.icon size={22} weight={isActive ? "bold" : "regular"} />
-              <span className="text-[8px] font-black uppercase tracking-tighter">
+              <span className="text-[9px] font-black uppercase tracking-tight">
                 {item.label}
               </span>
             </Link>

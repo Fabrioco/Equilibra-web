@@ -52,6 +52,13 @@ export function TransactionContextMenu({
   // Se o clique foi na metade de baixo, movemos o menu para cima do mouse
   const pivotY = y > screenHeight / 2 ? "-100%" : "0%";
 
+  const getRealId = (id: string | number) => {
+    if (typeof id === "string") {
+      return parseInt(id.split("-")[0]); // Pega o "123" de "123-virtual"
+    }
+    return id;
+  };
+
   return (
     <div
       ref={menuRef}
@@ -106,7 +113,7 @@ export function TransactionContextMenu({
           <button
             className="w-full px-4 py-2.5 text-left hover:bg-red-50 flex items-center gap-3 text-red-600 transition-colors font-medium"
             onClick={() => {
-              handleDelete(transaction.id, "one");
+              handleDelete(getRealId(transaction.id), "one");
               onClose();
             }}
           >
@@ -115,7 +122,7 @@ export function TransactionContextMenu({
           <button
             className="w-full px-4 py-2.5 text-left hover:bg-red-50 flex items-center gap-3 text-red-600 transition-colors font-medium"
             onClick={() => {
-              handleDelete(transaction.id, "all");
+              handleDelete(getRealId(transaction.id), "all");
               onClose();
             }}
           >

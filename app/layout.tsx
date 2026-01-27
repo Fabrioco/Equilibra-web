@@ -25,7 +25,7 @@ export default function RootLayout({
             flex-row no desktop para Sidebar + Conteúdo 
             flex-col no mobile para Conteúdo + Bottom Nav
           */}
-          <div className="flex flex-col md:flex-row min-h-screen">
+          <div className="flex flex-col md:flex-row min-h-screen pb-[calc(80px+env(safe-area-inset-bottom))]">
             {/* Sidebar fixa ou barra inferior no mobile */}
             <Sidebar />
 

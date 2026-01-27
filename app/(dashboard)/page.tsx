@@ -112,16 +112,63 @@ export default function Home() {
   }, [fetchTransactions, fetchGoals]);
 
   // --- Memoized Data ---
+
+  const expandFixedTransactions = useCallback(
+    (allTransactions: Transaction[], targetDate: Date) => {
+      return allTransactions
+        .map((t) => {
+          if (t.recurrence !== "FIXED") return t;
+
+          const originalDate = new Date(t.date);
+
+          // Criamos uma data comparável (primeiro dia do mês) para evitar erros de horas
+          const firstDayOfOriginal = new Date(
+            originalDate.getUTCFullYear(),
+            originalDate.getUTCMonth(),
+            1,
+          );
+          const firstDayOfTarget = new Date(
+            targetDate.getFullYear(),
+            targetDate.getMonth(),
+            1,
+          );
+
+          // Se o mês que estamos vendo é ANTERIOR ao mês de criação, não projetamos
+          if (firstDayOfTarget < firstDayOfOriginal) {
+            return null;
+          }
+
+          // Projeta para o dia original, mas no mês/ano que o usuário está navegando
+          const virtualDate = new Date(
+            targetDate.getFullYear(),
+            targetDate.getMonth(),
+            originalDate.getUTCDate(),
+          );
+
+          return {
+            ...t,
+            date: virtualDate.toISOString(),
+            id: `${t.id}-virtual`,
+          };
+        })
+        .filter(Boolean) as Transaction[]; // Remove os "null" das transações que não devem aparecer
+    },
+    [],
+  );
+
   const transactionsOfMonth = useMemo(() => {
-    return transactions.filter((t) => {
+    // 1. Projeta apenas as fixas que já existiam na data selecionada
+    const expanded = expandFixedTransactions(transactions, currentDate);
+
+    // 2. Filtra para mostrar apenas o que pertence ao mês atual do dashboard
+    return expanded.filter((t) => {
       const d = new Date(t.date);
       return (
         d.getUTCMonth() === currentDate.getMonth() &&
         d.getUTCFullYear() === currentDate.getFullYear()
       );
     });
-  }, [transactions, currentDate]);
-
+  }, [transactions, currentDate, expandFixedTransactions]);
   const summaryValues = useMemo(() => {
     const income = transactionsOfMonth
       .filter((t) => t.type === "INCOME")
@@ -243,7 +290,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-neutral-50/50 pb-20">
+    <div className="min-h-screen w-full bg-neutral-50/50">
       <div className="container mx-auto p-4 md:p-8 space-y-8">
         <Header
           isLoading={isLoading}
@@ -439,6 +486,7 @@ export default function Home() {
           open={openDrawer}
           onClose={handleCloseDrawer}
           onSuccess={fetchTransactions}
+          transactionToEdit={transactionToEdit}
         />
         {mobileMenu && (
           <MobileTransactionMenu
@@ -450,10 +498,15 @@ export default function Home() {
         )}
         {contextMenu && (
           <TransactionContextMenu
-            {...contextMenu}
+            x={contextMenu.x}
+            y={contextMenu.y}
+            transaction={contextMenu.transaction}
             onClose={() => setContextMenu(null)}
-            handleDelete={handleDeleteTransaction}
-            handleOpenEdit={handleOpenEdit}
+            handleDelete={(id, scope) => handleDeleteTransaction(id, scope)}
+            handleOpenEdit={(t) => {
+              handleOpenEdit(t);
+              setContextMenu(null);
+            }}
           />
         )}
         <UserSettingsDrawer
