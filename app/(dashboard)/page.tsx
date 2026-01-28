@@ -33,6 +33,21 @@ import { UserSettingsDrawer } from "../_components/ui/user-settings-drawer";
 import { API_URL } from "@/config/env";
 import { useAuth } from "@/contexts/auth-context";
 
+export type Goal = {
+  id: number;
+  title: string;
+  amountGoal: string; // Vem como string da API ("500000")
+  amountCurrent: string; // Vem como string da API ("30000")
+  date: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: number;
+};
+
+export type GoalResponse = {
+  items: Goal[];
+};
+
 export default function Home() {
   // --- Estados ---
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -52,6 +67,9 @@ export default function Home() {
     y: number;
     transaction: Transaction;
   } | null>(null);
+
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [currentGoalIndex, setCurrentGoalIndex] = useState(0);
 
   const router = useRouter();
 
@@ -97,15 +115,15 @@ export default function Home() {
       const res = await fetch(`${API_URL}/goals`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0)
-        setMonthlyGoal(data[data.length - 1].amount / 100);
-      else if (data.amount) setMonthlyGoal(data.amount / 100);
+      const data: GoalResponse = await res.json();
+
+      if (data.items && data.items.length > 0) {
+        setGoals(data.items);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao buscar metas:", err);
     }
   }, []);
-
   useEffect(() => {
     fetchTransactions();
     fetchGoals();
@@ -303,6 +321,42 @@ export default function Home() {
     }
   }
 
+  const nextGoal = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Evita abrir modais acidentalmente
+    setCurrentGoalIndex((prev) => (prev + 1 >= goals.length ? 0 : prev + 1));
+  };
+
+  const prevGoal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentGoalIndex((prev) => (prev <= 0 ? goals.length - 1 : prev - 1));
+  };
+
+  // Meta selecionada no momento
+  const activeGoal = goals[currentGoalIndex];
+
+  const goalStatus = useMemo(() => {
+    if (!activeGoal) return null;
+
+    const target = Number(activeGoal.amountGoal) / 100;
+    const current = Number(activeGoal.amountCurrent) / 100;
+
+    // Porcentagem real: (O que eu tenho agora / O que eu quero) * 100
+    const percent = (current / target) * 100;
+
+    // Para o "Foco no Objetivo", ainda usamos a projeção para saber
+    // quanto falta economizar *neste mês* para chegar lá
+    const remainingToGoal = target - current;
+
+    return {
+      title: activeGoal.title,
+      total: target,
+      current: current,
+      percent: percent, // Esta é a porcentagem da barra
+      isOver: current >= target,
+      remaining: remainingToGoal,
+    };
+  }, [activeGoal]);
+  
   return (
     <div className="min-h-screen w-full bg-neutral-50/50">
       <div className="container mx-auto p-4 md:p-8 space-y-8">
@@ -347,10 +401,58 @@ export default function Home() {
                 }
               />
               <CardSummary
-                title="Meta Mensal"
-                value={formatCurrency(summaryValues.goal)}
-                icon={<TargetIcon className="text-blue-500" />}
+                key={`goal-${currentGoalIndex}`} // Ajuda o React a identificar a troca para animações
+                title={
+                  <div className="flex items-center justify-between w-full group">
+                    <div className="flex flex-col">
+                      <span className="text-neutral-400 text-[10px] font-black uppercase tracking-widest leading-none">
+                        Meta: {goalStatus?.title || "Carregando..."}
+                      </span>
+                    </div>
+
+                    {/* Controles do Carrossel */}
+                    {goals.length > 1 && (
+                      <div className="flex items-center gap-1 bg-neutral-50 rounded-lg p-0.5 border border-neutral-100">
+                        <button
+                          onClick={prevGoal}
+                          className="p-1 hover:bg-white hover:shadow-sm rounded-md transition-all text-neutral-400 hover:text-neutral-900 active:scale-90"
+                          title="Meta anterior"
+                        >
+                          <ArrowLeftIcon size={12} weight="bold" />
+                        </button>
+
+                        <span className="text-[9px] font-bold text-neutral-400 px-1 select-none">
+                          {currentGoalIndex + 1}/{goals.length}
+                        </span>
+
+                        <button
+                          onClick={nextGoal}
+                          className="p-1 hover:bg-white hover:shadow-sm rounded-md transition-all text-neutral-400 hover:text-neutral-900 active:scale-90"
+                          title="Próxima meta"
+                        >
+                          <ArrowRightIcon size={12} weight="bold" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                }
+                value={formatCurrency(goalStatus?.total || 0)}
+                icon={
+                  <TargetIcon
+                    size={22}
+                    weight="bold"
+                    className={
+                      goalStatus?.isOver ? "text-green-500" : "text-blue-500"
+                    }
+                  />
+                }
                 color="text-blue-600"
+                subtitle={
+                  goalStatus
+                    ? `${goalStatus.percent.toFixed(0)}% poupado (${formatCurrency(goalStatus.current)} de ${formatCurrency(goalStatus.total)})`
+                    : "Defina seus objetivos"
+                }
+                progress={goalStatus?.percent}
               />
             </>
           )}
@@ -395,25 +497,27 @@ export default function Home() {
             </div>
             <div className="bg-neutral-900 rounded-3xl p-6 shadow-xl text-white">
               <p className="text-xs font-bold opacity-50 uppercase tracking-widest text-neutral-400">
-                Dica do Mês
+                Foco no Objetivo
               </p>
               <p className="text-sm mt-2 leading-relaxed font-medium">
                 {isLoading ? (
-                  "Carregando sabedoria..."
-                ) : summaryValues.expense === 0 &&
-                  summaryValues.income === 0 ? (
-                  "Seu dashboard está pronto! Que tal começar registrando sua primeira movimentação?"
-                ) : summaryValues.expense === 0 ? (
-                  "Tudo o que você ganhou está guardado. Ótimo momento para definir uma meta de investimento!"
+                  "Analisando..."
+                ) : goalStatus?.isOver ? (
+                  <span className="text-green-400">
+                    Incrível! Você já atingiu sua meta de economia para este
+                    mês. Todo valor extra agora é bônus! 🚀
+                  </span>
+                ) : summaryValues.projection <= 0 ? (
+                  <span className="text-red-400">
+                    Seu saldo está negativo ou zerado. Você precisa de{" "}
+                    {formatCurrency(goalStatus?.remaining || 0)} para começar a
+                    poupar para sua meta.
+                  </span>
                 ) : (
                   <>
-                    Você já economizou{" "}
-                    {formatCurrency(
-                      summaryValues.projection > 0
-                        ? summaryValues.projection
-                        : 0,
-                    )}{" "}
-                    até agora. Mantenha o foco!
+                    Faltam apenas {formatCurrency(goalStatus?.remaining || 0)}{" "}
+                    de economia para você atingir seu objetivo mensal. Você
+                    consegue!
                   </>
                 )}
               </p>
