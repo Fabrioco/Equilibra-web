@@ -113,49 +113,49 @@ export default function Home() {
 
   // --- Memoized Data ---
 
-  const expandFixedTransactions = useCallback(
-    (allTransactions: Transaction[], targetDate: Date) => {
-      return allTransactions
-        .map((t) => {
-          if (t.recurrence !== "FIXED") return t;
+const expandFixedTransactions = useCallback(
+  (allTransactions: Transaction[], targetDate: Date) => {
+    return allTransactions
+      .map((t) => {
+        if (t.recurrence !== "FIXED") return t;
 
-          const originalDate = new Date(t.date);
+        const originalDate = new Date(t.date);
+        const originalDay = originalDate.getUTCDate();
 
-          // Criamos uma data comparável (primeiro dia do mês) para evitar erros de horas
-          const firstDayOfOriginal = new Date(
-            originalDate.getUTCFullYear(),
-            originalDate.getUTCMonth(),
-            1,
-          );
-          const firstDayOfTarget = new Date(
-            targetDate.getFullYear(),
-            targetDate.getMonth(),
-            1,
-          );
+        // 1. Validação de segurança: Não mostrar no passado
+        const firstDayOfOriginal = new Date(originalDate.getUTCFullYear(), originalDate.getUTCMonth(), 1);
+        const firstDayOfTarget = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
 
-          // Se o mês que estamos vendo é ANTERIOR ao mês de criação, não projetamos
-          if (firstDayOfTarget < firstDayOfOriginal) {
-            return null;
-          }
+        if (firstDayOfTarget < firstDayOfOriginal) return null;
 
-          // Projeta para o dia original, mas no mês/ano que o usuário está navegando
-          const virtualDate = new Date(
-            targetDate.getFullYear(),
-            targetDate.getMonth(),
-            originalDate.getUTCDate(),
-          );
+        // 2. Lógica de Ajuste para meses mais curtos (Dia 31 -> 30 ou 28)
+        // Pegamos o último dia do mês que o usuário está vendo
+        const lastDayOfTargetMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0).getDate();
+        
+        // Se o dia original (ex: 31) for maior que o último dia do mês (ex: 28), usamos o último dia
+        const adjustedDay = Math.min(originalDay, lastDayOfTargetMonth);
 
-          return {
-            ...t,
-            date: virtualDate.toISOString(),
-            id: `${t.id}-virtual`,
-          };
-        })
-        .filter(Boolean) as Transaction[]; // Remove os "null" das transações que não devem aparecer
-    },
-    [],
-  );
+        const virtualDate = new Date(
+          targetDate.getFullYear(),
+          targetDate.getMonth(),
+          adjustedDay
+        );
 
+        // 3. Adicionamos uma flag ou aviso se o dia foi ajustado
+        const wasAdjusted = originalDay > lastDayOfTargetMonth;
+
+        return {
+          ...t,
+          date: virtualDate.toISOString(),
+          id: `${t.id}-virtual`,
+          // Podemos adicionar um aviso aqui para o componente de lista ler
+          title: wasAdjusted ? `${t.title} (Ajustado para o fim do mês)` : t.title,
+        };
+      })
+      .filter(Boolean) as Transaction[];
+  },
+  [],
+);
   const transactionsOfMonth = useMemo(() => {
     // 1. Projeta apenas as fixas que já existiam na data selecionada
     const expanded = expandFixedTransactions(transactions, currentDate);
