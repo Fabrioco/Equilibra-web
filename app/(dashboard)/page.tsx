@@ -113,49 +113,63 @@ export default function Home() {
 
   // --- Memoized Data ---
 
-const expandFixedTransactions = useCallback(
-  (allTransactions: Transaction[], targetDate: Date) => {
-    return allTransactions
-      .map((t) => {
-        if (t.recurrence !== "FIXED") return t;
+  const expandFixedTransactions = useCallback(
+    (allTransactions: Transaction[], targetDate: Date) => {
+      return allTransactions
+        .map((t) => {
+          if (t.recurrence !== "FIXED") return t;
 
-        const originalDate = new Date(t.date);
-        const originalDay = originalDate.getUTCDate();
+          const originalDate = new Date(t.date);
+          const originalDay = originalDate.getUTCDate();
 
-        // 1. Validação de segurança: Não mostrar no passado
-        const firstDayOfOriginal = new Date(originalDate.getUTCFullYear(), originalDate.getUTCMonth(), 1);
-        const firstDayOfTarget = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+          // 1. Validação de segurança: Não mostrar no passado
+          const firstDayOfOriginal = new Date(
+            originalDate.getUTCFullYear(),
+            originalDate.getUTCMonth(),
+            1,
+          );
+          const firstDayOfTarget = new Date(
+            targetDate.getFullYear(),
+            targetDate.getMonth(),
+            1,
+          );
 
-        if (firstDayOfTarget < firstDayOfOriginal) return null;
+          if (firstDayOfTarget < firstDayOfOriginal) return null;
 
-        // 2. Lógica de Ajuste para meses mais curtos (Dia 31 -> 30 ou 28)
-        // Pegamos o último dia do mês que o usuário está vendo
-        const lastDayOfTargetMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0).getDate();
-        
-        // Se o dia original (ex: 31) for maior que o último dia do mês (ex: 28), usamos o último dia
-        const adjustedDay = Math.min(originalDay, lastDayOfTargetMonth);
+          // 2. Lógica de Ajuste para meses mais curtos (Dia 31 -> 30 ou 28)
+          // Pegamos o último dia do mês que o usuário está vendo
+          const lastDayOfTargetMonth = new Date(
+            targetDate.getFullYear(),
+            targetDate.getMonth() + 1,
+            0,
+          ).getDate();
 
-        const virtualDate = new Date(
-          targetDate.getFullYear(),
-          targetDate.getMonth(),
-          adjustedDay
-        );
+          // Se o dia original (ex: 31) for maior que o último dia do mês (ex: 28), usamos o último dia
+          const adjustedDay = Math.min(originalDay, lastDayOfTargetMonth);
 
-        // 3. Adicionamos uma flag ou aviso se o dia foi ajustado
-        const wasAdjusted = originalDay > lastDayOfTargetMonth;
+          const virtualDate = new Date(
+            targetDate.getFullYear(),
+            targetDate.getMonth(),
+            adjustedDay,
+          );
 
-        return {
-          ...t,
-          date: virtualDate.toISOString(),
-          id: `${t.id}-virtual`,
-          // Podemos adicionar um aviso aqui para o componente de lista ler
-          title: wasAdjusted ? `${t.title} (Ajustado para o fim do mês)` : t.title,
-        };
-      })
-      .filter(Boolean) as Transaction[];
-  },
-  [],
-);
+          // 3. Adicionamos uma flag ou aviso se o dia foi ajustado
+          const wasAdjusted = originalDay > lastDayOfTargetMonth;
+
+          return {
+            ...t,
+            date: virtualDate.toISOString(),
+            id: `${t.id}-virtual`,
+            // Podemos adicionar um aviso aqui para o componente de lista ler
+            title: wasAdjusted
+              ? `${t.title} (Ajustado para o fim do mês)`
+              : t.title,
+          };
+        })
+        .filter(Boolean) as Transaction[];
+    },
+    [],
+  );
   const transactionsOfMonth = useMemo(() => {
     // 1. Projeta apenas as fixas que já existiam na data selecionada
     const expanded = expandFixedTransactions(transactions, currentDate);
@@ -353,8 +367,11 @@ const expandFixedTransactions = useCallback(
                 <div className="h-8 w-20 bg-neutral-100 animate-pulse mt-2 rounded" />
               ) : (
                 <p className="text-3xl font-black text-neutral-900 mt-1">
-                  {/* Condicional aqui */}
-                  {user?.privacyMode ? "**%" : `${summaryValues.commitment}%`}
+                  {user?.privacyMode
+                    ? "**%"
+                    : summaryValues.expense === 0
+                      ? "0%"
+                      : `${summaryValues.commitment}%`}
                 </p>
               )}
               <div className="w-full bg-neutral-100 h-2 rounded-full overflow-hidden mt-4">
@@ -363,26 +380,44 @@ const expandFixedTransactions = useCallback(
                     summaryValues.commitment > 80
                       ? "bg-red-500"
                       : "bg-neutral-900"
-                  } ${user?.privacyMode ? "opacity-0" : "opacity-100"}`} // Esconde a barra
+                  } ${user?.privacyMode || summaryValues.expense === 0 ? "opacity-0" : "opacity-100"}`}
                   style={{
                     width: `${isLoading ? 0 : summaryValues.commitment}%`,
                   }}
                 />
               </div>
+              {/* Texto auxiliar dinâmico */}
+              {!isLoading && summaryValues.expense === 0 && (
+                <p className="text-[10px] text-neutral-400 mt-2 font-medium">
+                  Nenhum gasto este mês. Parabéns! 🥂
+                </p>
+              )}
             </div>
-
             <div className="bg-neutral-900 rounded-3xl p-6 shadow-xl text-white">
               <p className="text-xs font-bold opacity-50 uppercase tracking-widest text-neutral-400">
                 Dica do Mês
               </p>
               <p className="text-sm mt-2 leading-relaxed font-medium">
-                Você já economizou{" "}
-                {formatCurrency(
-                  summaryValues.projection > 0 ? summaryValues.projection : 0,
-                )}{" "}
-                até agora. Mantenha o foco!
+                {isLoading ? (
+                  "Carregando sabedoria..."
+                ) : summaryValues.expense === 0 &&
+                  summaryValues.income === 0 ? (
+                  "Seu dashboard está pronto! Que tal começar registrando sua primeira movimentação?"
+                ) : summaryValues.expense === 0 ? (
+                  "Tudo o que você ganhou está guardado. Ótimo momento para definir uma meta de investimento!"
+                ) : (
+                  <>
+                    Você já economizou{" "}
+                    {formatCurrency(
+                      summaryValues.projection > 0
+                        ? summaryValues.projection
+                        : 0,
+                    )}{" "}
+                    até agora. Mantenha o foco!
+                  </>
+                )}
               </p>
-            </div>
+            </div>{" "}
           </div>
           {/* Gráfico de Categoria */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-neutral-100 h-80">
