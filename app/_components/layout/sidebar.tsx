@@ -26,7 +26,9 @@ export function Sidebar() {
   const userInitial = user?.name?.charAt(0).toUpperCase() || "U";
 
   const isAuthPage =
-    pathname === "/auth/login" || pathname === "/auth/register";
+    pathname === "/auth/login" ||
+    pathname === "/auth/register" ||
+    pathname === "/no-auth/forgot-password";
 
   if (isAuthPage) return null;
 
