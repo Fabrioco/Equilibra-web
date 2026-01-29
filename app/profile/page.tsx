@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/contexts/auth-context";
 import { toast } from "react-toastify";
 import { API_URL } from "@/config/env";
+import { ChangePasswordDrawer } from "../_components/ui/change-password-drawer";
 
 export default function ProfilePage() {
   const { user, logout, updateUserData } = useAuth();
@@ -21,6 +22,7 @@ export default function ProfilePage() {
   const [isPrivacyMode, setIsPrivacyMode] = useState<boolean>(false);
   const [enableNotifications, setEnableNotifications] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [openChangePassword, setOpenChangePassword] = useState<boolean>(false);
 
   // Sincroniza estados locais com os dados do Contexto/Banco
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function ProfilePage() {
 
       // Atualiza contexto global
       if (updateUserData) await updateUserData(data);
-        toast.success("Preferência salva! ✨");
+      toast.success("Preferência salva! ✨");
     } catch (error) {
       // Reverte o estado local em caso de falha
       if (field === "privacyMode") setIsPrivacyMode(!value);
@@ -205,7 +207,6 @@ export default function ProfilePage() {
                 </button>
               </div>
             </form>
-
             <div className="bg-white rounded-4xl p-8 shadow-sm border border-neutral-100">
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-2 bg-neutral-100 rounded-xl text-neutral-900">
@@ -285,7 +286,6 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-
             {/* SEGURANÇA */}
             <div className="bg-white rounded-4xl p-8 shadow-sm border border-neutral-100">
               <div className="flex items-center gap-3 mb-8">
@@ -296,19 +296,33 @@ export default function ProfilePage() {
                   Segurança
                 </h3>
               </div>
-              <button className="flex items-center justify-between w-full p-6 bg-neutral-50 border border-neutral-100 rounded-2xl hover:border-neutral-900 transition-all group active:scale-[0.99]">
-                <span className="text-sm font-black text-neutral-900 uppercase tracking-widest">
-                  Redefinir Senha de Acesso
-                </span>
+
+              {/* Ao clicar, abre o modal/drawer */}
+              <button
+                onClick={() => setOpenChangePassword(true)} // Crie esse estado
+                className="flex items-center justify-between w-full p-6 bg-neutral-50 border border-neutral-100 rounded-2xl hover:border-neutral-900 transition-all group active:scale-[0.99]"
+              >
+                <div className="text-left">
+                  <span className="text-sm font-black text-neutral-900 uppercase tracking-widest block">
+                    Alterar Senha de Acesso
+                  </span>
+                  <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-tight">
+                    Recomendamos trocar a cada 3 meses
+                  </span>
+                </div>
                 <LockIcon
                   size={20}
                   className="text-neutral-400 group-hover:text-neutral-900 transition-colors"
                 />
               </button>
-            </div>
+            </div>{" "}
           </div>
         </div>
       </div>
+      <ChangePasswordDrawer
+        open={openChangePassword}
+        onClose={() => setOpenChangePassword(false)}
+      />
     </div>
   );
 }
