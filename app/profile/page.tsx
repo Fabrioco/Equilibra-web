@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { toast } from "react-toastify";
 import { API_URL } from "@/config/env";
 import { ChangePasswordDrawer } from "../_components/ui/change-password-drawer";
+import { PricingModal } from "../_components/ui/pricing-modal";
 
 export default function ProfilePage() {
   const { user, logout, updateUserData } = useAuth();
@@ -23,6 +24,7 @@ export default function ProfilePage() {
   const [enableNotifications, setEnableNotifications] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState<boolean>(false);
+  const [openPricing, setOpenPricing] = useState<boolean>(false);
 
   // Sincroniza estados locais com os dados do Contexto/Banco
   useEffect(() => {
@@ -150,9 +152,12 @@ export default function ProfilePage() {
               </span>
               <div className="flex justify-between items-center mt-2">
                 <p className="text-2xl font-black tracking-tight">
-                  {user?.plan || "FREE"}
+                  {user?.plan}
                 </p>
-                <button className="text-[10px] font-black uppercase bg-white/10 px-4 py-2 rounded-xl border border-white/20 hover:bg-white text-neutral-900 transition-all">
+                <button
+                  onClick={() => setOpenPricing(true)} // Abre o modal aqui
+                  className="z-10 text-[10px] font-black uppercase bg-white/10 px-4 py-2 rounded-xl border border-white/20 hover:bg-white text-neutral-900 transition-all active:scale-95"
+                >
                   Upgrade
                 </button>
               </div>
@@ -323,6 +328,7 @@ export default function ProfilePage() {
         open={openChangePassword}
         onClose={() => setOpenChangePassword(false)}
       />
+      <PricingModal open={openPricing} onClose={() => setOpenPricing(false)} />
     </div>
   );
 }

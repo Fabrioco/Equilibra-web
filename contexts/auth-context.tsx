@@ -11,7 +11,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean; // Útil para evitar flash de tela de login
   login: (email: string, password: string) => Promise<void>;
-  register: (formData: {
+    register: (formData: {
     name: string;
     email: string;
     password: string;
