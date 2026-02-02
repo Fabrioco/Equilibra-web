@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { LoginResponse } from "@/app/auth/types/auth.types";
 import { ERROR_TRANSLATIONS } from "@/app/auth/constants/error-messages";
 import { API_URL } from "@/config/env";
+import { fetchApi, getAuthHeaders } from "@/lib/api";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -49,26 +50,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const res = await fetch(`${API_URL}/auth/me`, {
+        const { data: userData, ok } = await fetchApi<User>("/auth/me", {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
         });
 
-        if (res.ok) {
-          const userData = await res.json();
+        if (ok) {
           setIsAuthenticated(true);
           setUser(userData);
         } else {
-          // Token inválido ou expirado
           localStorage.removeItem("token");
           setIsAuthenticated(false);
           setUser(null);
         }
       } catch {
-        // Erro de rede ou outro erro
         localStorage.removeItem("token");
         setIsAuthenticated(false);
         setUser(null);
