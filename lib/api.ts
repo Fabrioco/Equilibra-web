@@ -16,16 +16,22 @@ export function getAuthHeaders(): Record<string, string> {
   return headers;
 }
 
+type FetchApiOptions = RequestInit & { auth?: boolean };
+
 export async function fetchApi<T = unknown>(
   path: string,
-  options: RequestInit = {}
+  options: FetchApiOptions = {}
 ): Promise<{ data: T; ok: boolean; status: number }> {
+  const { auth = true, ...rest } = options;
   const url = `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  const headers = auth
+    ? getAuthHeaders()
+    : { "Content-Type": "application/json" };
   const res = await fetch(url, {
-    ...options,
+    ...rest,
     headers: {
-      ...getAuthHeaders(),
-      ...(options.headers as Record<string, string>),
+      ...headers,
+      ...(rest.headers as Record<string, string>),
     },
   });
   const data = (await res.json().catch(() => ({}))) as T;
