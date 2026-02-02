@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { LoginResponse } from "@/app/auth/types/auth.types";
 import { ERROR_TRANSLATIONS } from "@/app/auth/constants/error-messages";
-import { API_URL } from "@/config/env";
+import { fetchApi } from "@/lib/api";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -49,26 +49,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const res = await fetch(`${API_URL}/auth/me`, {
+        const { data: userData, ok } = await fetchApi<User>("/auth/me", {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
         });
 
-        if (res.ok) {
-          const userData = await res.json();
+        if (ok) {
           setIsAuthenticated(true);
           setUser(userData);
         } else {
-          // Token inválido ou expirado
           localStorage.removeItem("token");
           setIsAuthenticated(false);
           setUser(null);
         }
       } catch {
-        // Erro de rede ou outro erro
         localStorage.removeItem("token");
         setIsAuthenticated(false);
         setUser(null);
@@ -84,28 +77,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      const { data, ok } = await fetchApi<LoginResponse>("/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        auth: false,
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        // 1. Tenta pegar a primeira mensagem de erro do Zod (ex: password ou email)
+      if (!ok) {
         const errors = data.errors as Record<string, string[]> | undefined;
         const firstZodError =
           errors && typeof errors === "object"
             ? Object.values(errors)[0]?.[0]
             : null;
-
-        // 2. Usa a tradução para o erro do Zod ou para a mensagem geral
         const rawError =
-          firstZodError || data.message || "Falha ao realizar login";
-        const translated = ERROR_TRANSLATIONS[rawError] || rawError;
-
-        toast.error(translated);
+          firstZodError || (data as { message?: string }).message || "Falha ao realizar login";
+        toast.error(ERROR_TRANSLATIONS[rawError] || rawError);
         setIsLoading(false);
         return;
       }
@@ -130,23 +116,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_URL}/auth/register`, {
+      const { data, ok } = await fetchApi<LoginResponse>("/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        auth: false,
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        // Lógica de tradução que você já fez (mantida)
-        const errors = data.errors as Record<string, string[]> | undefined;
+      if (!ok) {
+        const errors = (data as { errors?: Record<string, string[]> }).errors;
         const rawError =
           (errors ? Object.values(errors)[0]?.[0] : null) ||
-          data.message ||
+          (data as { message?: string }).message ||
           "Erro";
-        const translated = ERROR_TRANSLATIONS[rawError] || rawError;
-        toast.error(translated);
+        toast.error(ERROR_TRANSLATIONS[rawError] || rawError);
         return;
       }
 
