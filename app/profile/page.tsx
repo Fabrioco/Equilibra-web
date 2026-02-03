@@ -11,20 +11,20 @@ import {
   SignOutIcon,
 } from "@phosphor-icons/react";
 import { useAuth } from "@/contexts/auth-context";
+import { usePlanLimit } from "@/contexts/plan-limit-context";
 import { toast } from "react-toastify";
 import { API_URL } from "@/config/env";
 import { ChangePasswordDrawer } from "../_components/ui/change-password-drawer";
-import { PricingModal } from "../_components/ui/pricing-modal";
 
 export default function ProfilePage() {
   const { user, logout, updateUserData } = useAuth();
+  const { openPricingModal } = usePlanLimit();
 
   // Estados Locais para os Switches
   const [isPrivacyMode, setIsPrivacyMode] = useState<boolean>(false);
   const [enableNotifications, setEnableNotifications] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [openChangePassword, setOpenChangePassword] = useState<boolean>(false);
-  const [openPricing, setOpenPricing] = useState<boolean>(false);
 
   // Sincroniza estados locais com os dados do Contexto/Banco
   useEffect(() => {
@@ -155,7 +155,7 @@ export default function ProfilePage() {
                   {user?.plan}
                 </p>
                 <button
-                  onClick={() => setOpenPricing(true)} // Abre o modal aqui
+                  onClick={() => openPricingModal()}
                   className="z-10 text-[10px] font-black uppercase bg-white/10 px-4 py-2 rounded-xl border border-white/20 hover:bg-white text-neutral-900 transition-all active:scale-95"
                 >
                   Upgrade
@@ -328,7 +328,6 @@ export default function ProfilePage() {
         open={openChangePassword}
         onClose={() => setOpenChangePassword(false)}
       />
-      <PricingModal open={openPricing} onClose={() => setOpenPricing(false)} />
     </div>
   );
 }

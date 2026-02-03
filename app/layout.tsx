@@ -3,6 +3,7 @@ import "./globals.css";
 import { Montserrat } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "@/contexts/auth-context";
+import { PlanLimitProvider } from "@/contexts/plan-limit-context";
 import { Sidebar } from "./_components/layout/sidebar";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${montserrat.className} bg-neutral-50 antialiased`}>
         <AuthProvider>
+          <PlanLimitProvider>
           {/* Wrapper Principal: 
             flex-row no desktop para Sidebar + Conteúdo 
             flex-col no mobile para Conteúdo + Bottom Nav
@@ -37,6 +39,7 @@ export default function RootLayout({
           </div>
 
           <ToastContainer position="top-right" autoClose={3000} />
+          </PlanLimitProvider>
         </AuthProvider>
       </body>
     </html>
