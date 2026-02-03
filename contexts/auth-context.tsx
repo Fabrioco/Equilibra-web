@@ -11,7 +11,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean; // Útil para evitar flash de tela de login
   login: (email: string, password: string) => Promise<void>;
-    register: (formData: {
+  register: (formData: {
     name: string;
     email: string;
     password: string;
@@ -90,7 +90,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             ? Object.values(errors)[0]?.[0]
             : null;
         const rawError =
-          firstZodError || (data as { message?: string }).message || "Falha ao realizar login";
+          firstZodError ||
+          (data as { message?: string }).message ||
+          "Falha ao realizar login";
         toast.error(ERROR_TRANSLATIONS[rawError] || rawError);
         setIsLoading(false);
         return;
