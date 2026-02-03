@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Transaction } from "../../types/transaction.type";
 import { toast } from "react-toastify";
 import { API_URL } from "@/config/env";
+import { usePlanLimit } from "@/contexts/plan-limit-context";
 
 export function NewTransactionForm({
   onClose,
@@ -12,6 +13,7 @@ export function NewTransactionForm({
   onSuccess: () => void;
   initialData?: Transaction | null; // Adicionado aqui
 }) {
+  const { openPlanLimitModal } = usePlanLimit();
   type TransactionType = "INCOME" | "EXPENSE";
   const isEditing = !!initialData; // Helper para saber se é edição
 
@@ -108,6 +110,10 @@ export function NewTransactionForm({
       const data = await res.json();
 
       if (!res.ok) {
+        if (res.status === 403 && data.code === "PLAN_LIMIT_EXCEEDED") {
+          openPlanLimitModal(data.limitType ?? "transactions");
+          return;
+        }
         toast.error(
           data.message || `Erro ao ${isEditing ? "editar" : "criar"} transação`,
         );
