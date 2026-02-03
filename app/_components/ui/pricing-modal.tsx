@@ -34,7 +34,11 @@ const PLANS: Plan[] = [
     name: "Gratuito",
     value: 0,
     icon: <LightningIcon size={24} weight="fill" />,
-    features: ["Acesso básico", "Até 10 registros", "Suporte via email"],
+    features: [
+      "Até 10 transações/mês",
+      "Até 2 metas financeiras",
+      "Suporte via e-mail",
+    ],
     color: "text-neutral-400",
   },
   {
@@ -42,7 +46,12 @@ const PLANS: Plan[] = [
     name: "Essencial",
     value: 15,
     icon: <LightningIcon size={24} weight="fill" />,
-    features: ["Acesso ilimitado", "Notificações Web", "Suporte 24h"],
+    features: [
+      "Até 50 transações/mês",
+      "Até 5 metas financeiras",
+      "Notificações Web",
+      "Suporte 24h",
+    ],
     color: "text-blue-500",
   },
   {
@@ -52,9 +61,10 @@ const PLANS: Plan[] = [
     popular: true,
     icon: <CrownIcon size={24} weight="fill" />,
     features: [
-      "Tudo do Essencial",
-      "Modo Privacidade Pro",
+      "Até 200 transações/mês",
+      "Até 15 metas financeiras",
       "Relatórios Mensais",
+      "Modo Privacidade Pro",
     ],
     color: "text-amber-500",
   },
@@ -63,11 +73,15 @@ const PLANS: Plan[] = [
     name: "Elite",
     value: 25,
     icon: <RocketLaunchIcon size={24} weight="fill" />,
-    features: ["Tudo do Pro", "Mentoria Exclusiva", "Acesso Antecipado"],
+    features: [
+      "Transações ilimitadas",
+      "Metas ilimitadas",
+      "Mentoria Exclusiva",
+      "Acesso Antecipado",
+    ],
     color: "text-purple-500",
   },
 ];
-
 export function PricingModal({
   open,
   onClose,
@@ -233,12 +247,26 @@ export function PricingModal({
                   </label>
                   <input
                     type="text"
-                    value={documentValue.replace(
-                      /(\d{3})(\d{3})(\d{3})(\d{2})/g,
-                      "$1.$2.$3-$4",
-                    )}
-                    onChange={(e) => setDocumentValue(e.target.value)}
-                    placeholder="000.000.000-00"
+                    value={documentValue}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "");
+                      if (val.length <= 11) {
+                        setDocumentValue(
+                          val.replace(
+                            /(\d{3})(\d{3})(\d{3})(\d{2})/g,
+                            "$1.$2.$3-$4",
+                          ),
+                        );
+                      } else {
+                        setDocumentValue(
+                          val.replace(
+                            /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g,
+                            "$1.$2.$3/$4-$5",
+                          ),
+                        );
+                      }
+                    }}
+                    placeholder="CPF ou CNPJ"
                     className="w-full p-5 bg-white border-2 border-neutral-100 rounded-2xl font-bold text-lg focus:border-neutral-900 outline-none transition-all shadow-sm group-hover:border-neutral-200"
                   />
                 </div>
