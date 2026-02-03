@@ -1,6 +1,6 @@
 "use client";
 
-import {  useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   XIcon,
   TargetIcon,
@@ -9,6 +9,7 @@ import {
 } from "@phosphor-icons/react";
 import { toast } from "react-toastify";
 import { API_URL } from "@/config/env";
+import { usePlanLimit } from "@/contexts/plan-limit-context";
 
 interface Goal {
   id: number;
@@ -31,6 +32,7 @@ export function GoalDrawer({
   onSuccess,
   goalToEdit,
 }: GoalDrawerProps) {
+  const { openPlanLimitModal } = usePlanLimit();
   const [title, setTitle] = useState("");
   const [amountGoal, setAmountGoal] = useState("");
   const [date, setDate] = useState("");
@@ -92,11 +94,17 @@ export function GoalDrawer({
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (res.ok) {
         toast.success(goalToEdit ? "Meta atualizada!" : "Meta criada!");
         onSuccess();
         onClose();
       } else {
+        if (res.status === 403 && data.code === "PLAN_LIMIT_EXCEEDED") {
+          openPlanLimitModal(data.limitType ?? "goals");
+          return;
+        }
         toast.error("Erro ao salvar meta");
       }
     } catch {
