@@ -20,7 +20,7 @@ type FetchApiOptions = RequestInit & { auth?: boolean };
 
 export async function fetchApi<T = unknown>(
   path: string,
-  options: FetchApiOptions = {}
+  options: FetchApiOptions = {},
 ): Promise<{ data: T; ok: boolean; status: number }> {
   const { auth = true, ...rest } = options;
   const url = `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
