@@ -12,12 +12,12 @@ import {
 } from "@phosphor-icons/react";
 
 // Tipos, Features e UI
-import { Transaction } from "../types/transaction.type";
-import { TransactionList } from "../_features/transactions/components/transaction-list";
-import { TransactionDrawer } from "../_components/ui/new-transaction-drawer";
-import { MobileTransactionMenu } from "../_components/layout/mobile-transaction-menu";
-import { TransactionContextMenu } from "../_components/layout/transaction-context-menu";
 import { API_URL } from "@/config/env";
+import { Transaction } from "@/app/types/transaction.type";
+import { TransactionContextMenu } from "@/app/_components/ui/transaction-context-menu";
+import { MobileTransactionMenu } from "@/app/_components/ui/mobile-transaction-menu";
+import { TransactionDrawer } from "@/app/_components/ui/new-transaction-drawer";
+import { TransactionList } from "./_components/transaction-list";
 
 export default function TransactionsPage() {
   const [isLoading, setIsLoading] = useState(true);

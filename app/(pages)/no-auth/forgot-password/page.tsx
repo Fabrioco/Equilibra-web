@@ -144,7 +144,6 @@ export default function ForgotPassword() {
                   label="Enviar código"
                   icon={<PaperPlaneTiltIcon size={20} weight="bold" />}
                 />
-                Icon
               </div>
             </form>
           )}

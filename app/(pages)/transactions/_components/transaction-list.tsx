@@ -4,7 +4,7 @@ import {
   DotsThreeVerticalIcon,
 } from "@phosphor-icons/react";
 import { Transaction } from "../../../types/transaction.type";
-import { SkeletonRow } from "../../../_components/ui/skeleton-states";
+import { SkeletonRow } from "../../../_components/layout/skeleton-states";
 
 interface TransactionListProps {
   transactions: Transaction[];
