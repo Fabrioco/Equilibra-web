@@ -1,5 +1,5 @@
 import { XIcon } from "@phosphor-icons/react";
-import { NewTransactionForm } from "../layout/new-transaction-form";
+import { NewTransactionForm } from "./new-transaction-form";
 import React, { useEffect } from "react";
 import { Transaction } from "../../types/transaction.type";
 

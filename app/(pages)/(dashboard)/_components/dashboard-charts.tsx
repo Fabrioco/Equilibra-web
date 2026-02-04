@@ -13,7 +13,7 @@ import {
 import {
   CATEGORY_COLORS,
   DEFAULT_COLOR,
-} from "../../constants/category-colors";
+} from "../constants/category-colors";
 
 export const CategoryPieChart = ({
   data,

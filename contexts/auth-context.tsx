@@ -3,9 +3,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { LoginResponse } from "@/app/auth/types/auth.types";
-import { ERROR_TRANSLATIONS } from "@/app/auth/constants/error-messages";
+import { ERROR_TRANSLATIONS } from "@/app/(pages)/auth/constants/error-messages";
 import { fetchApi } from "@/lib/api";
+import { LoginResponse } from "@/app/types/auth.types";
 
 interface AuthContextType {
   isAuthenticated: boolean;

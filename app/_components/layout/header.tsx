@@ -1,5 +1,5 @@
 import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
-import { CardUser } from "../ui/card-user";
+import { CardUser } from "../../(pages)/(dashboard)/_components/card-user";
 
 export default function Header({
   isLoading,

@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { usePlanLimit } from "@/contexts/plan-limit-context";
 import { toast } from "react-toastify";
 import { API_URL } from "@/config/env";
-import { ChangePasswordDrawer } from "../_components/ui/change-password-drawer";
+import { ChangePasswordDrawer } from "./_components/change-password-drawer";
 
 export default function ProfilePage() {
   const { user, logout, updateUserData } = useAuth();
@@ -32,7 +32,7 @@ export default function ProfilePage() {
       setIsPrivacyMode(user.privacyMode);
       setEnableNotifications(user.enableNotifications);
     }
-  }, [user?.privacyMode, user?.enableNotifications]);
+  }, [user?.privacyMode, user?.enableNotifications, user]);
 
   // 1. Função Genérica para os Switches (Auto-save)
   const updatePreference = async (
@@ -60,7 +60,7 @@ export default function ProfilePage() {
       // Atualiza contexto global
       if (updateUserData) await updateUserData(data);
       toast.success("Preferência salva! ✨");
-    } catch (error) {
+    } catch {
       // Reverte o estado local em caso de falha
       if (field === "privacyMode") setIsPrivacyMode(!value);
       if (field === "enableNotifications") setEnableNotifications(!value);
@@ -91,8 +91,9 @@ export default function ProfilePage() {
 
       if (updateUserData) await updateUserData(data);
       toast.success("Perfil atualizado! ✨");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: Error | unknown) {
+      if (error instanceof Error) toast.error(error.message);
+      else toast.error("Erro ao atualizar perfil.");
     } finally {
       setIsUpdating(false);
     }

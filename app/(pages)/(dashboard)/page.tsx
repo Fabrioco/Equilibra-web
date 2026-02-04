@@ -13,25 +13,21 @@ import {
 } from "@phosphor-icons/react";
 
 // Tipos e Constantes
-import { Transaction } from "../types/transaction.type";
-
-// Componentes UI e Layout
-import Header from "../_components/layout/header";
-import { CardSummary } from "../_components/ui/card-summary";
-import { SkeletonCard } from "../_components/ui/skeleton-states";
+import { API_URL } from "@/config/env";
+import { useAuth } from "@/contexts/auth-context";
+import { Transaction } from "@/app/types/transaction.type";
+import Header from "@/app/_components/layout/header";
+import { SkeletonCard } from "@/app/_components/layout/skeleton-states";
+import { CardSummary } from "@/app/(pages)/(dashboard)/_components/card-summary";
 import {
   CategoryPieChart,
   DailyAreaChart,
-} from "../_components/ui/dashboard-charts";
-
-// Features (Transações e Usuário)
-import { TransactionList } from "../_features/transactions/components/transaction-list";
-import { TransactionDrawer } from "../_components/ui/new-transaction-drawer";
-import { MobileTransactionMenu } from "../_components/layout/mobile-transaction-menu";
-import { TransactionContextMenu } from "../_components/layout/transaction-context-menu";
-import { UserSettingsDrawer } from "../_components/ui/user-settings-drawer";
-import { API_URL } from "@/config/env";
-import { useAuth } from "@/contexts/auth-context";
+} from "@/app/(pages)/(dashboard)/_components/dashboard-charts";
+import { TransactionList } from "@/app/(pages)/transactions/_components/transaction-list";
+import { TransactionDrawer } from "@/app/_components/ui/new-transaction-drawer";
+import { MobileTransactionMenu } from "@/app/_components/ui/mobile-transaction-menu";
+import { TransactionContextMenu } from "@/app/_components/ui/transaction-context-menu";
+import { UserSettingsDrawer } from "@/app/(pages)/(dashboard)/_components/user-settings-drawer";
 
 export type Goal = {
   id: number;
@@ -356,7 +352,7 @@ export default function Home() {
       remaining: remainingToGoal,
     };
   }, [activeGoal]);
-  
+
   return (
     <div className="min-h-screen w-full bg-neutral-50/50">
       <div className="container mx-auto p-4 md:p-8 space-y-8">
