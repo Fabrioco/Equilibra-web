@@ -1,8 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import { useState, useMemo } from "react";
 import {
   MagnifyingGlassIcon,
   DownloadSimpleIcon,
@@ -11,8 +9,9 @@ import {
   ArrowRightIcon,
 } from "@phosphor-icons/react";
 
-// Tipos, Features e UI
-import { API_URL } from "@/config/env";
+import { useTransactions } from "@/contexts/transaction-context";
+import { useAuth } from "@/contexts/auth-context";
+
 import { Transaction } from "@/app/types/transaction.type";
 import { TransactionContextMenu } from "@/app/_components/ui/transaction-context-menu";
 import { MobileTransactionMenu } from "@/app/_components/ui/mobile-transaction-menu";
@@ -20,19 +19,28 @@ import { TransactionDrawer } from "@/app/_components/ui/new-transaction-drawer";
 import { TransactionList } from "./_components/transaction-list";
 
 export default function TransactionsPage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { user } = useAuth();
 
-  // Estados de UI
+  const {
+    transactionsOfMonth,
+    isLoading,
+    currentDate,
+    nextMonth,
+    prevMonth,
+    searchTerm,
+    setSearchTerm,
+    sortOrder,
+    setSortOrder,
+    deleteTransaction,
+    fetchTransactions,
+  } = useTransactions();
+
+  const [filterType, setFilterType] = useState<"ALL" | "INCOME" | "EXPENSE">(
+    "ALL",
+  );
   const [openDrawer, setOpenDrawer] = useState(false);
   const [transactionToEdit, setTransactionToEdit] =
     useState<Transaction | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState("recent");
-  const [filterType, setFilterType] = useState("ALL"); // ALL, INCOME, EXPENSE
-  const [currentDate, setCurrentDate] = useState(new Date());
-
-  // Estados de Menu
   const [mobileMenu, setMobileMenu] = useState<Transaction | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -40,84 +48,12 @@ export default function TransactionsPage() {
     transaction: Transaction;
   } | null>(null);
 
-  const router = useRouter();
-
-  // --- API ---
-  const fetchTransactions = useCallback(async () => {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (!token) return router.push("/auth/login");
-    try {
-      setIsLoading(true);
-      const res = await fetch(
-        `${API_URL}/transactions`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      if (res.status === 401) {
-        localStorage.removeItem("token");
-        return router.push("/auth/login");
-      }
-      const data = await res.json();
-      setTransactions(Array.isArray(data.items) ? data.items : []);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setTimeout(() => setIsLoading(false), 500);
-    }
-  }, [router]);
-
-  useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
-
-  // --- Handlers ---
-  const nextMonth = () =>
-    setCurrentDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
-    );
-  const prevMonth = () =>
-    setCurrentDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
-    );
-
-  const handleOpenEdit = (t: Transaction) => {
-    setTransactionToEdit(t);
-    setOpenDrawer(true);
-  };
-
-  const handleDeleteTransaction = async (
-    id: number,
-    scope: "one" | "all" = "one",
-  ) => {
-    if (scope === "all" && !confirm("Excluir série?")) return;
-    const res = await fetch(
-      `${API_URL}/transactions/${id}?scope=${scope}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      },
-    );
-    if (res.ok) {
-      toast.success("Excluído!");
-      fetchTransactions();
-      setMobileMenu(null);
-      setContextMenu(null);
-    }
-  };
-
-  // --- Lógica de Filtro e Ordenação ---
   const filteredTransactions = useMemo(() => {
-    let res = transactions.filter((t) => {
-      const d = new Date(t.date);
-      return (
-        d.getUTCMonth() === currentDate.getMonth() &&
-        d.getUTCFullYear() === currentDate.getFullYear()
-      );
-    });
+    let res = [...transactionsOfMonth];
 
-    if (filterType !== "ALL") res = res.filter((t) => t.type === filterType);
+    if (filterType !== "ALL") {
+      res = res.filter((t) => t.type === filterType);
+    }
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
@@ -144,15 +80,26 @@ export default function TransactionsPage() {
     });
 
     return res;
-  }, [transactions, searchTerm, sortOrder, filterType, currentDate]);
+  }, [transactionsOfMonth, filterType, sortOrder, searchTerm]);
 
-  const formatCurrency = (v: number) =>
-    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const formatCurrency = (value: number) => {
+    if (user?.privacyMode) return "*******";
+    return value.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  };
+
   const monthName = currentDate.toLocaleString("pt-BR", { month: "long" });
 
+  const handleOpenEdit = (t: Transaction) => {
+    setTransactionToEdit(t);
+    setOpenDrawer(true);
+  };
+
   return (
-    <div className="min-h-screen w-full pb-20">
-      {/* Header Sticky com Design de Histórico */}
+    <div className="min-h-screen w-full pb-20 bg-neutral-50/40">
+      {/* HEADER */}
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
         <div className="container mx-auto px-4 md:px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -161,7 +108,7 @@ export default function TransactionsPage() {
                 Histórico de Transações
               </h1>
               <p className="text-sm text-neutral-400 font-medium">
-                Gerencie e filtre todos os seus lançamentos
+                Gerencie e filtre seus lançamentos
               </p>
             </div>
 
@@ -180,24 +127,24 @@ export default function TransactionsPage() {
         </div>
       </header>
 
+      {/* CONTEÚDO */}
       <main className="container mx-auto px-4 md:px-8 py-8">
-        {/* Barra de Filtros Robusta */}
-        <div className="bg-white p-4 rounded-3xl border border-neutral-100 shadow-sm mb-6 flex flex-col lg:flex-row gap-4">
+        {/* BARRA DE FILTROS */}
+        <div className="bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-neutral-100 shadow-sm mb-6 flex flex-col lg:flex-row gap-4">
           <div className="relative flex-1">
             <MagnifyingGlassIcon
               className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
               size={20}
             />
             <input
-              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Pesquisar descrição ou categoria..."
               className="w-full pl-12 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-neutral-900 transition"
-              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {/* Navegador de Mês */}
             <div className="flex items-center bg-neutral-50 rounded-2xl border border-neutral-100 p-1">
               <button
                 onClick={prevMonth}
@@ -205,7 +152,7 @@ export default function TransactionsPage() {
               >
                 <ArrowLeftIcon size={16} weight="bold" />
               </button>
-              <span className="text-xs font-black px-3 capitalize min-w-25 text-center">
+              <span className="text-xs font-black px-3 capitalize min-w-24 text-center">
                 {monthName}
               </span>
               <button
@@ -218,8 +165,10 @@ export default function TransactionsPage() {
 
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="bg-neutral-50 border border-neutral-100 rounded-2xl px-4 py-3 text-xs font-black text-neutral-600 outline-none focus:ring-2 focus:ring-neutral-900 appearance-none cursor-pointer"
+              onChange={(e) =>
+                setFilterType(e.target.value as typeof filterType)
+              }
+              className="bg-neutral-50 border border-neutral-100 rounded-2xl px-4 py-3 text-xs font-black text-neutral-600 outline-none cursor-pointer"
             >
               <option value="ALL">Todos os Tipos</option>
               <option value="INCOME">Entradas</option>
@@ -229,7 +178,7 @@ export default function TransactionsPage() {
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="bg-neutral-50 border border-neutral-100 rounded-2xl px-4 py-3 text-xs font-black text-neutral-600 outline-none focus:ring-2 focus:ring-neutral-900 appearance-none cursor-pointer"
+              className="bg-neutral-50 border border-neutral-100 rounded-2xl px-4 py-3 text-xs font-black text-neutral-600 outline-none cursor-pointer"
             >
               <option value="recent">Recentes</option>
               <option value="oldest">Antigas</option>
@@ -239,7 +188,7 @@ export default function TransactionsPage() {
           </div>
         </div>
 
-        {/* Listagem Estilo Tabela */}
+        {/* LISTAGEM */}
         <div className="bg-white rounded-3xl border border-neutral-100 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-neutral-50 flex justify-between items-center bg-neutral-50/30">
             <h3 className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
@@ -264,7 +213,7 @@ export default function TransactionsPage() {
         </div>
       </main>
 
-      {/* Componentes de Suporte */}
+      {/* DRAWER */}
       <TransactionDrawer
         open={openDrawer}
         onClose={() => {
@@ -275,11 +224,12 @@ export default function TransactionsPage() {
         onSuccess={fetchTransactions}
       />
 
+      {/* MENUS */}
       {mobileMenu && (
         <MobileTransactionMenu
           transaction={mobileMenu}
           onClose={() => setMobileMenu(null)}
-          onDelete={handleDeleteTransaction}
+          onDelete={(id) => deleteTransaction(id, "one")}
           onEdit={handleOpenEdit}
         />
       )}
@@ -288,7 +238,7 @@ export default function TransactionsPage() {
         <TransactionContextMenu
           {...contextMenu}
           onClose={() => setContextMenu(null)}
-          handleDelete={handleDeleteTransaction}
+          handleDelete={(id) => deleteTransaction(id, "one")}
           handleOpenEdit={handleOpenEdit}
         />
       )}
