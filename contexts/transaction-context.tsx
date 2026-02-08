@@ -26,6 +26,8 @@ interface TransactionContextData {
   prevMonth: () => void;
   fetchTransactions: () => Promise<void>;
   deleteTransaction: (id: number, scope?: "one" | "all") => Promise<void>;
+  displayLimit: number;
+  setDisplayLimit: (limit: number) => void;
 }
 
 const TransactionContext = createContext<TransactionContextData>(
@@ -42,6 +44,7 @@ export function TransactionProvider({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("recent");
+  const [displayLimit, setDisplayLimit] = useState(10);
 
   const router = useRouter();
 
@@ -148,6 +151,8 @@ export function TransactionProvider({
         prevMonth,
         fetchTransactions,
         deleteTransaction,
+        displayLimit,
+        setDisplayLimit,
       }}
     >
       {children}

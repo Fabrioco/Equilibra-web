@@ -156,6 +156,8 @@ export function PricingModal({
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
+          name: user.name,
+          email: user.email,
           cpfCnpj: rawDoc,
           planValue: selectedPlan.value,
           billingType: "CREDIT_CARD", // Mantendo padrão conforme seu código anterior
