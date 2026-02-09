@@ -11,8 +11,8 @@ import { GoalProvider } from "@/contexts/goal-context";
 const montserrat = Montserrat({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Finance App",
-  description: "Aplicativo de gestão financeira",
+  title: "Equilibra",
+  description: "Equilibra - Controle Financeiro",
 };
 
 export default function RootLayout({
