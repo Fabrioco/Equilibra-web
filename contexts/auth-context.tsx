@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { ERROR_TRANSLATIONS } from "@/app/(pages)/auth/constants/error-messages";
@@ -45,34 +51,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const router = useRouter();
 
-  const initializeAuth = async () => {
+  const initializeAuth = useCallback(async () => {
     const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const { data: userData, ok } = await fetchApi<User>("/auth/me", {
-          method: "GET",
-        });
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
 
-        if (ok) {
-          setIsAuthenticated(true);
-          setUser(userData);
-        } else {
-          localStorage.removeItem("token");
-          setIsAuthenticated(false);
-          setUser(null);
-        }
-      } catch {
+    try {
+      const { data, ok } = await fetchApi<User>("/auth/me");
+      if (ok) {
+        setUser(data);
+        setIsAuthenticated(true);
+      } else {
         localStorage.removeItem("token");
         setIsAuthenticated(false);
         setUser(null);
       }
+    } catch (error) {
+      localStorage.removeItem("token");
+      setIsAuthenticated(false);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     initializeAuth();
-  }, []);
+  }, [initializeAuth]);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);

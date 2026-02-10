@@ -12,6 +12,7 @@ import { Transaction } from "@/app/types/transaction.type";
 import { API_URL } from "@/config/env";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { useAuth } from "./auth-context";
 
 interface TransactionContextData {
   transactions: Transaction[];
@@ -39,6 +40,8 @@ export function TransactionProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { user, isAuthenticated } = useAuth();
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -133,8 +136,10 @@ export function TransactionProvider({
     setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
 
   useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
+    if (user && isAuthenticated) {
+      fetchTransactions();
+    }
+  }, [fetchTransactions, user, isAuthenticated]);
 
   return (
     <TransactionContext.Provider

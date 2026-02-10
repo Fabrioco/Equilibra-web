@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ArrowUpIcon,
   ArrowDownIcon,
@@ -31,9 +31,12 @@ import { UserSettingsDrawer } from "@/app/(pages)/(dashboard)/_components/user-s
 
 // Tipos
 import { Transaction } from "@/app/types/transaction.type";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
 
   // --- Consumo do TransactionContext ---
   const {
@@ -175,6 +178,23 @@ export default function Home() {
     setOpenDrawer(false);
     setTransactionToEdit(null);
   };
+
+  if (authLoading) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-white gap-4">
+        <div className="w-12 h-12 border-4 border-neutral-100 border-t-neutral-900 rounded-full animate-spin" />
+        <p className="text-xs font-black uppercase tracking-widest text-neutral-400">
+          Equilibrando...
+        </p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    localStorage.removeItem("token");
+    toast.success("Desculpa, é necessário que faça o login");
+    router.push("/auth/login");
+  }
 
   return (
     <div className="min-h-screen w-full bg-neutral-50/50">

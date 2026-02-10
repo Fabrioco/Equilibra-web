@@ -1,8 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+} from "react";
 import { API_URL } from "@/config/env";
 import { toast } from "react-toastify";
+import { useAuth } from "./auth-context";
 
 export type Goal = {
   id: number;
@@ -35,6 +43,7 @@ interface GoalContextData {
 const GoalContext = createContext<GoalContextData>({} as GoalContextData);
 
 export function GoalProvider({ children }: { children: React.ReactNode }) {
+  const { user, isAuthenticated } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isLoadingGoals, setIsLoadingGoals] = useState(true);
   const [currentGoalIndex, setCurrentGoalIndex] = useState(0);
@@ -64,7 +73,10 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
     setCurrentGoalIndex((prev) => (prev <= 0 ? goals.length - 1 : prev - 1));
   };
 
-  const activeGoal = useMemo(() => goals[currentGoalIndex] || null, [goals, currentGoalIndex]);
+  const activeGoal = useMemo(
+    () => goals[currentGoalIndex] || null,
+    [goals, currentGoalIndex],
+  );
 
   const goalStatus = useMemo(() => {
     if (!activeGoal) return null;
@@ -85,8 +97,10 @@ export function GoalProvider({ children }: { children: React.ReactNode }) {
   }, [activeGoal]);
 
   useEffect(() => {
-    fetchGoals();
-  }, [fetchGoals]);
+    if (user && isAuthenticated) {
+      fetchGoals();
+    }
+  }, [fetchGoals, user, isAuthenticated]);
 
   return (
     <GoalContext.Provider
