@@ -9,13 +9,13 @@ import {
   ArrowRightIcon,
 } from "@phosphor-icons/react";
 
-import { useTransactions } from "@/contexts/transaction-context";
-import { useAuth } from "@/contexts/auth-context";
+import { useTransactions } from "@/app/contexts/transaction-context";
+import { useAuth } from "@/app/contexts/auth-context";
 
 import { Transaction } from "@/app/types/transaction.type";
-import { TransactionContextMenu } from "@/app/_components/ui/transaction-context-menu";
-import { MobileTransactionMenu } from "@/app/_components/ui/mobile-transaction-menu";
-import { TransactionDrawer } from "@/app/_components/ui/new-transaction-drawer";
+import { TransactionContextMenu } from "@/app/components/ui/transaction-context-menu";
+import { MobileTransactionMenu } from "@/app/components/ui/mobile-transaction-menu";
+import { TransactionDrawer } from "@/app/components/ui/new-transaction-drawer";
 import { TransactionList } from "./_components/transaction-list";
 
 export default function TransactionsPage() {

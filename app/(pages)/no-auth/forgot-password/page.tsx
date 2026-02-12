@@ -12,7 +12,7 @@ import {
   ShieldCheckIcon,
 } from "@phosphor-icons/react";
 import { toast } from "react-toastify";
-import { API_URL } from "@/config/env";
+import { API_URL } from "@/app/config/env";
 import { useRouter } from "next/navigation";
 
 type Step = "REQUEST" | "VERIFY" | "RESET";

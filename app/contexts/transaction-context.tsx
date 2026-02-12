@@ -9,7 +9,7 @@ import React, {
   useEffect,
 } from "react";
 import { Transaction } from "@/app/types/transaction.type";
-import { API_URL } from "@/config/env";
+import { API_URL } from "@/app/config/env";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useAuth } from "./auth-context";

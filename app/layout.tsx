@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Montserrat } from "next/font/google";
 import { ToastContainer } from "react-toastify";
-import { AuthProvider } from "@/contexts/auth-context";
-import { PlanLimitProvider } from "@/contexts/plan-limit-context";
-import { Sidebar } from "./_components/layout/sidebar";
-import { TransactionProvider } from "@/contexts/transaction-context";
-import { GoalProvider } from "@/contexts/goal-context";
+import { AuthProvider } from "@/app/contexts/auth-context";
+import { PlanLimitProvider } from "@/app/contexts/plan-limit-context";
+import { Sidebar } from "./components/layout/sidebar";
+import { TransactionProvider } from "@/app/contexts/transaction-context";
+import { GoalProvider } from "@/app/contexts/goal-context";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 

@@ -1,5 +1,5 @@
 "use client";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/app/contexts/auth-context";
 import { GearSixIcon } from "@phosphor-icons/react";
 
 export function CardUser({ onOpenSettings }: { onOpenSettings: () => void }) {

@@ -10,10 +10,10 @@ import {
   EyeSlashIcon,
   SignOutIcon,
 } from "@phosphor-icons/react";
-import { useAuth } from "@/contexts/auth-context";
-import { usePlanLimit } from "@/contexts/plan-limit-context";
+import { useAuth } from "@/app/contexts/auth-context";
+import { usePlanLimit } from "@/app/contexts/plan-limit-context";
 import { toast } from "react-toastify";
-import { API_URL } from "@/config/env";
+import { API_URL } from "@/app/config/env";
 import { ChangePasswordDrawer } from "./_components/change-password-drawer";
 
 export default function ProfilePage() {

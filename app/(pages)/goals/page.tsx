@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { GoalDrawer } from "./_components/goals-drawer";
 import { DeleteGoalModal } from "./_components/delete-goal-modal";
 import { AdjustBalanceModal } from "./_components/adjust-balance-modal";
-import { API_URL } from "@/config/env";
+import { API_URL } from "@/app/config/env";
 
 interface Goal {
   id: number;
@@ -67,12 +67,9 @@ export default function GoalsPage() {
 
     try {
       setIsLoading(true);
-      const res = await fetch(
-        `${API_URL}/goals`,
-        {
-          headers: getAuthHeader(),
-        },
-      );
+      const res = await fetch(`${API_URL}/goals`, {
+        headers: getAuthHeader(),
+      });
       const data = await res.json();
       if (data && data.items) setGoals(data.items);
       else setGoals([]);
@@ -108,13 +105,10 @@ export default function GoalsPage() {
 
   const confirmDelete = async () => {
     try {
-      const res = await fetch(
-        `${API_URL}/goals/${deleteModal.goalId}`,
-        {
-          method: "DELETE",
-          headers: getAuthHeader(),
-        },
-      );
+      const res = await fetch(`${API_URL}/goals/${deleteModal.goalId}`, {
+        method: "DELETE",
+        headers: getAuthHeader(),
+      });
 
       if (res.status === 204) {
         toast.success("Meta excluída!");
@@ -142,14 +136,11 @@ export default function GoalsPage() {
     }
 
     try {
-      const res = await fetch(
-        `${API_URL}/goals/${balanceModal.goal.id}`,
-        {
-          method: "PUT",
-          headers: getAuthHeader(),
-          body: JSON.stringify({ amountCurrent: Number(newTotal) }),
-        },
-      );
+      const res = await fetch(`${API_URL}/goals/${balanceModal.goal.id}`, {
+        method: "PUT",
+        headers: getAuthHeader(),
+        body: JSON.stringify({ amountCurrent: Number(newTotal) }),
+      });
 
       if (res.ok) {
         toast.success("Saldo atualizado!");
