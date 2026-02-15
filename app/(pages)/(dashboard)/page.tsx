@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ArrowUpIcon,
   ArrowDownIcon,
@@ -182,6 +182,14 @@ export default function Home() {
     setTransactionToEdit(null);
   };
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      localStorage.removeItem("token");
+      toast.info("Desculpa, faça login novamente");
+      router.push("/auth/login");
+    }
+  }, [user, authLoading, router]);
+
   if (authLoading) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-white gap-4">
@@ -191,12 +199,6 @@ export default function Home() {
         </p>
       </div>
     );
-  }
-
-  if (!user) {
-    localStorage.removeItem("token");
-    toast.success("Desculpa, é necessário que faça o login");
-    router.push("/auth/login");
   }
 
   return (
