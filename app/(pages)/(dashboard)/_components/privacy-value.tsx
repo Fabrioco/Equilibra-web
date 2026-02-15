@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/src/contexts/auth-context";
+import { useAuth } from "@/app/contexts/auth-context";
 
 interface PrivacyValueProps {
   value: string | number;
