@@ -11,7 +11,7 @@ import {
   EyeSlashIcon,
 } from "@phosphor-icons/react";
 import { toast } from "react-toastify";
-import { API_URL } from "@/config/env";
+import { API_URL } from "@/app/config/env";
 
 export function ChangePasswordDrawer({
   open,

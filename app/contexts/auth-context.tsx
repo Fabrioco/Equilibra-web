@@ -10,7 +10,7 @@ import React, {
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { ERROR_TRANSLATIONS } from "@/app/(pages)/auth/constants/error-messages";
-import { fetchApi } from "@/lib/api";
+import { fetchApi } from "@/app/service/api";
 import { LoginResponse } from "@/app/types/auth.types";
 
 interface AuthContextType {

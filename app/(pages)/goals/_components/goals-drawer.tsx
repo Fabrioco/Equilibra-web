@@ -8,8 +8,8 @@ import {
   CurrencyDollarIcon,
 } from "@phosphor-icons/react";
 import { toast } from "react-toastify";
-import { API_URL } from "@/config/env";
-import { usePlanLimit } from "@/contexts/plan-limit-context";
+import { API_URL } from "@/app/config/env";
+import { usePlanLimit } from "@/app/contexts/plan-limit-context";
 
 interface Goal {
   id: number;

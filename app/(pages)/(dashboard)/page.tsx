@@ -11,22 +11,22 @@ import {
 } from "@phosphor-icons/react";
 
 // Contextos e Hooks
-import { useAuth } from "@/contexts/auth-context";
-import { useTransactions } from "@/contexts/transaction-context";
-import { useGoals } from "@/contexts/goal-context";
+import { useAuth } from "@/app/contexts/auth-context";
+import { useTransactions } from "@/app/contexts/transaction-context";
+import { useGoals } from "@/app/contexts/goal-context";
 
 // Componentes de UI
-import Header from "@/app/_components/layout/header";
-import { SkeletonCard } from "@/app/_components/layout/skeleton-states";
+import Header from "@/app/components/layout/header";
+import { SkeletonCard } from "@/app/components/layout/skeleton-states";
 import { CardSummary } from "@/app/(pages)/(dashboard)/_components/card-summary";
 import {
   CategoryPieChart,
   DailyAreaChart,
 } from "@/app/(pages)/(dashboard)/_components/dashboard-charts";
 import { TransactionList } from "@/app/(pages)/transactions/_components/transaction-list";
-import { TransactionDrawer } from "@/app/_components/ui/new-transaction-drawer";
-import { MobileTransactionMenu } from "@/app/_components/ui/mobile-transaction-menu";
-import { TransactionContextMenu } from "@/app/_components/ui/transaction-context-menu";
+import { TransactionDrawer } from "@/app/components/ui/new-transaction-drawer";
+import { MobileTransactionMenu } from "@/app/components/ui/mobile-transaction-menu";
+import { TransactionContextMenu } from "@/app/components/ui/transaction-context-menu";
 import { UserSettingsDrawer } from "@/app/(pages)/(dashboard)/_components/user-settings-drawer";
 
 // Tipos
@@ -138,7 +138,10 @@ export default function Home() {
         },
         {} as Record<string, number>,
       );
-    return Object.entries(totals).map(([name, value]) => ({ name, value }));
+    return Object.entries(totals).map(([name, value]) => ({
+      name,
+      value: value as number,
+    }));
   }, [transactionsOfMonth]);
 
   const filteredTransactions = useMemo(() => {
@@ -179,6 +182,14 @@ export default function Home() {
     setTransactionToEdit(null);
   };
 
+  useEffect(() => {
+    if (!authLoading && !user) {
+      localStorage.removeItem("token");
+      toast.info("Desculpa, faça login novamente");
+      router.push("/auth/login");
+    }
+  }, [user, authLoading, router]);
+
   if (authLoading) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-white gap-4">
@@ -188,12 +199,6 @@ export default function Home() {
         </p>
       </div>
     );
-  }
-
-  if (!user) {
-    localStorage.removeItem("token");
-    toast.success("Desculpa, é necessário que faça o login");
-    router.push("/auth/login");
   }
 
   return (

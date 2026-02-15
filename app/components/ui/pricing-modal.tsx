@@ -13,9 +13,9 @@ import {
   StarIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/app/contexts/auth-context";
 import { toast } from "react-toastify";
-import { API_URL } from "@/config/env";
+import { API_URL } from "@/app/config/env";
 
 // --- Tipagem ---
 interface Plan {

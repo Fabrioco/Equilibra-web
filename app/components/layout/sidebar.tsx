@@ -9,7 +9,7 @@ import {
   UserCircleIcon,
   HouseIcon,
 } from "@phosphor-icons/react";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/app/contexts/auth-context";
 
 const menuItems = [
   { label: "Início", icon: HouseIcon, href: "/" },
@@ -85,7 +85,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1.5 min-w-[64px] transition-all ${
+              className={`flex flex-col items-center gap-1.5 min-w-16 transition-all ${
                 isActive ? "text-neutral-900 scale-105" : "text-neutral-400"
               }`}
             >

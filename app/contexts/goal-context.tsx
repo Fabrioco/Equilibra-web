@@ -8,7 +8,7 @@ import React, {
   useMemo,
   useEffect,
 } from "react";
-import { API_URL } from "@/config/env";
+import { API_URL } from "@/app/config/env";
 import { toast } from "react-toastify";
 import { useAuth } from "./auth-context";
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { API_URL } from "@/config/env";
-import { useAuth } from "@/contexts/auth-context";
+import { API_URL } from "@/app/config/env";
+import { useAuth } from "@/app/contexts/auth-context";
 import {
   XIcon,
   UserIcon,

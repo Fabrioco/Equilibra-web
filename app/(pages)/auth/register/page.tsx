@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { RegisterForm } from "../components/register-form";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/app/contexts/auth-context";
 
 // --- Página Principal ---
 export default function RegisterPage() {

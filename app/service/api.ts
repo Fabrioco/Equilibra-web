@@ -1,4 +1,4 @@
-import { API_URL } from "@/config/env";
+import { API_URL } from "@/app/config/env";
 
 function getToken(): string | null {
   if (typeof window === "undefined") return null;

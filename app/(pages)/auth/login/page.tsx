@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React from "react";
 import { LoginForm } from "../components/login-form";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/app/contexts/auth-context";
 
 export default function LoginPage() {
   const [email, setEmail] = React.useState<string>("");
