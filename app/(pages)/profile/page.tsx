@@ -104,7 +104,7 @@ export default function ProfilePage() {
     : "U";
 
   return (
-    <div className="min-h-screen w-full bg-neutral-50/50 pb-20">
+    <div className="min-h-svh w-full bg-neutral-50/50 pb-20">
       <div className="container mx-auto p-4 md:p-8 space-y-8">
         <div>
           <h1 className="text-3xl font-black text-neutral-900 tracking-tight">

@@ -164,7 +164,7 @@ export default function GoalsPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-neutral-50/50">
+    <div className="min-h-svh w-full bg-neutral-50/50">
       <div className="container mx-auto p-4 md:p-8 space-y-8">
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

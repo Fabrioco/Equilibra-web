@@ -35,7 +35,7 @@ export function Sidebar() {
   return (
     <>
       {/* SIDEBAR DESKTOP - Agora como uma coluna fixa que ocupa espaço */}
-      <aside className="hidden md:flex flex-col w-28 h-screen sticky top-0 bg-neutral-50/50 border-r border-neutral-100 py-8 items-center justify-between z-50">
+      <aside className="hidden md:flex flex-col w-28 h-svh sticky top-0 bg-neutral-50/50 border-r border-neutral-100 py-8 items-center justify-between z-50">
         {/* Logo Superior */}
         <div className="p-3 bg-neutral-900 rounded-2xl shadow-lg shadow-neutral-200">
           <ChartPieSliceIcon size={28} weight="fill" className="text-white" />
@@ -78,7 +78,7 @@ export function Sidebar() {
         </div>
       </aside>
       {/* MOBILE BOTTOM NAV - Versão Corrigida */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-neutral-100 z-50 px-4 pt-3 flex justify-around items-center  shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-neutral-100 z-50 px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] flex justify-around items-center  shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (

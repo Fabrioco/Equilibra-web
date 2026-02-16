@@ -33,6 +33,7 @@ import { UserSettingsDrawer } from "@/app/(pages)/(dashboard)/_components/user-s
 import { Transaction } from "@/app/types/transaction.type";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import processTransaction from "@/app/service/transaction";
 
 export default function Home() {
   const { user, isLoading: authLoading } = useAuth();
@@ -192,7 +193,7 @@ export default function Home() {
 
   if (authLoading) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-white gap-4">
+      <div className="h-svh w-full flex flex-col items-center justify-center bg-white gap-4">
         <div className="w-12 h-12 border-4 border-neutral-100 border-t-neutral-900 rounded-full animate-spin" />
         <p className="text-xs font-black uppercase tracking-widest text-neutral-400">
           Equilibrando...
@@ -202,7 +203,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-neutral-50/50">
+    <div className="min-h-svh w-full bg-neutral-50/50">
       <div className="container mx-auto p-4 md:p-8 space-y-8">
         <Header
           isLoading={isLoading}

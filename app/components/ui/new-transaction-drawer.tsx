@@ -43,14 +43,14 @@ export function TransactionDrawer({
     <>
       <div
         onClick={onClose}
-        className={`fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity z-100 min-h-screen ${
+        className={`fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity z-100 min-h-svh ${
           open ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       />
 
       {/* Drawer */}
       <aside
-        className={`fixed top-0 right-0 h-screen w-full sm:w-105 bg-white z-101 shadow-xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-svh w-full sm:w-105 bg-white z-101 shadow-xl transform transition-transform duration-300 ease-in-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -68,7 +68,7 @@ export function TransactionDrawer({
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto h-[calc(100vh-68px)]">
+        <div className="p-6 overflow-y-auto h-calc-100svh-68px">
           <NewTransactionForm
             // A key muda se o ID da transação mudar ou se mudar de 'Edição' para 'Novo'
             key={transactionToEdit?.id || "new-transaction"}
