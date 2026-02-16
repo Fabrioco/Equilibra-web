@@ -23,3 +23,20 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Mobile-safe viewport utilities using svh to avoid address-bar gaps */
+.h-svh {
+  height: 100svh;
+}
+.min-h-svh {
+  min-height: 100svh;
+}
+.max-h-95svh {
+  max-height: 95svh;
+}
+.h-calc-100svh-68px {
+  height: calc(100svh - 68px);
+}
+.h-calc-100svh-100px {
+  height: calc(100svh - 100px);
+}

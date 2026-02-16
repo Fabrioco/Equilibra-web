@@ -91,14 +91,14 @@ export function UserSettingsDrawer({
       {/* Overlay */}
       <div
         onClick={onClose}
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm min-h-screen transition-opacity z-100 ${
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm min-h-svh transition-opacity z-100 ${
           open ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       />
 
       {/* Drawer */}
       <aside
-        className={`fixed top-0 right-0 h-screen w-full sm:w-105 bg-white z-101 shadow-2xl transform transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) ${
+        className={`fixed top-0 right-0 h-svh w-full sm:w-105 bg-white z-101 shadow-2xl transform transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -119,7 +119,7 @@ export function UserSettingsDrawer({
         </div>
 
         {/* Content */}
-        <div className="p-8 space-y-8 overflow-y-auto h-[calc(100vh-100px)]">
+        <div className="p-8 space-y-8 overflow-y-auto h-calc-100svh-100px">
           {/* Avatar Section */}
           <div className="flex flex-col items-center gap-4 py-4">
             <div className="relative group">

@@ -3,6 +3,7 @@ import { Transaction } from "../../types/transaction.type";
 import { toast } from "react-toastify";
 import { API_URL } from "@/app/config/env";
 import { usePlanLimit } from "@/app/contexts/plan-limit-context";
+import processTransaction from "@/app/service/transaction";
 
 export function NewTransactionForm({
   onClose,
@@ -45,6 +46,8 @@ export function NewTransactionForm({
     initialData?.totalInstallment || 2,
   );
   const [categories, setCategories] = useState<string[]>([]);
+
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   // 1. Efeito para carregar dados de edição ou limpar para novo
 
@@ -135,6 +138,42 @@ export function NewTransactionForm({
     }
   }
 
+  // Dentro do componente NewTransactionForm
+
+  async function handleAiInput(text: string) {
+    if (!text) return;
+    setIsAiLoading(true);
+    try {
+      const data = await processTransaction(text);
+
+      // Mapeia o resultado da IA para os seus setStates
+      if (data.type) setTypeIs(data.type);
+      if (data.title) setTitle(data.title);
+      if (data.amount) {
+        const valorEmCentavos = data.amount * 100;
+        setAmount(valorEmCentavos);
+      }
+      if (data.category) setCategory(data.category);
+      if (data.date) setDate(data.date);
+
+      if (data.recurrence === "FIXED") {
+        setIsFixed(true);
+        setIsInstallments(false);
+      } else if (data.recurrence === "INSTALLMENT") {
+        setIsInstallments(true);
+        setIsFixed(false);
+        if (data.totalInstallment) setInstallments(data.totalInstallment);
+      }
+
+      toast.success("Dados preenchidos pela IA!");
+    } catch (error) {
+      toast.error("A IA não entendeu a frase. Tente ser mais específico.");
+      console.error(error);
+    } finally {
+      setIsAiLoading(false);
+    }
+  }
+
   useEffect(() => {
     const fetchCategories = async () => {
       const token = localStorage.getItem("token");
@@ -182,6 +221,84 @@ export function NewTransactionForm({
         handleSubmit();
       }}
     >
+      {!isEditing && (
+        <div className="relative overflow-hidden p-4 rounded-2xl border border-neutral-200/60 bg-white/50 backdrop-blur-md shadow-sm mb-8 group transition-all hover:border-neutral-300">
+          {/* Efeito sutil de brilho ao fundo */}
+          <div className="absolute -top-10 -right-10 w-24 h-24 bg-neutral-100 rounded-full blur-3xl opacity-50 group-hover:bg-neutral-200 transition-colors" />
+
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1 bg-neutral-900 rounded-md">
+                <svg
+                  className="w-3 h-3 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+              <label className="text-[11px] uppercase tracking-wider font-bold text-neutral-500">
+                Entrada Inteligente
+              </label>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="O que você gastou hoje?"
+                className="flex-1 bg-transparent border-b border-neutral-200 py-1 text-sm outline-none focus:border-neutral-900 transition-colors placeholder:text-neutral-400"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAiInput(e.currentTarget.value);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  const input = e.currentTarget
+                    .previousSibling as HTMLInputElement;
+                  handleAiInput(input.value);
+                }}
+                disabled={isAiLoading}
+                className="flex items-center justify-center w-8 h-8 rounded-lg bg-neutral-900 text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:hover:scale-100"
+                title="Processar com IA"
+              >
+                {isAiLoading ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
+            <p className="mt-2 text-[10px] text-neutral-400">
+              Pressione{" "}
+              <kbd className="bg-neutral-100 px-1 rounded border">Enter</kbd>{" "}
+              para preencher o formulário
+            </p>
+          </div>
+        </div>
+      )}
+
       {!isEditing && (
         <div className="flex justify-end">
           <button

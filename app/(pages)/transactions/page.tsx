@@ -98,7 +98,7 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="min-h-screen w-full pb-20 bg-neutral-50/40">
+    <div className="min-h-svh w-full pb-20 bg-neutral-50/40">
       {/* HEADER */}
       <header className="bg-white border-b border-neutral-100 sticky top-0 z-10">
         <div className="container mx-auto px-4 md:px-8 py-6">
