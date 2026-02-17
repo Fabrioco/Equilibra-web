@@ -79,21 +79,47 @@ export function TransactionProvider({
   const expandFixedTransactions = useCallback(
     (all: Transaction[], target: Date) =>
       all.flatMap((t) => {
+        // Se não for fixa, retorna ela mesma
         if (t.recurrence !== "FIXED") return [t];
 
-        const original = new Date(t.date);
-        const virtual = new Date(
+        const originalDate = new Date(t.date);
+
+        // Criamos a instância para o mês que o usuário está olhando (target)
+        const virtualDate = new Date(
           target.getFullYear(),
           target.getMonth(),
-          Math.min(
-            original.getDate(),
-            new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate(),
-          ),
+          originalDate.getUTCDate(), // Usar o dia original
         );
 
-        if (virtual < original) return [];
+        // Regra 1: Se a transação fixa foi criada DEPOIS do mês que estou olhando, ela não existe ainda.
+        const firstDayOfTargetMonth = new Date(
+          target.getFullYear(),
+          target.getMonth(),
+          1,
+        );
+        const lastDayOfCreationMonth = new Date(
+          originalDate.getFullYear(),
+          originalDate.getMonth() + 1,
+          0,
+        );
 
-        return [{ ...t, date: virtual.toISOString(), isVirtual: true }];
+        if (
+          originalDate >
+          new Date(target.getFullYear(), target.getMonth() + 1, 0)
+        ) {
+          return [];
+        }
+
+        // Regra 2: Se for o mês exato da criação, retornamos a original (não a virtual)
+        if (
+          originalDate.getUTCMonth() === target.getMonth() &&
+          originalDate.getUTCFullYear() === target.getFullYear()
+        ) {
+          return [{ ...t, isVirtual: false }];
+        }
+
+        // Regra 3: Para meses futuros, retornamos a virtual
+        return [{ ...t, date: virtualDate.toISOString(), isVirtual: true }];
       }),
     [],
   );
